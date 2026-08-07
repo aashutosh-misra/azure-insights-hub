@@ -73,6 +73,8 @@ async function getWorkItems(org: string, ids: number[], pat: string): Promise<Wo
   const out: WorkItem[] = [];
   const fields = [
     "System.Id",
+    "System.Title",
+    "System.AssignedTo",
     "System.WorkItemType",
     "System.State",
     "System.ChangedDate",
@@ -174,6 +176,106 @@ async function projectHealth(
   };
 
   return { ...base, calcRag: computeRag(base) };
+}
+
+export type Metric =
+  | "stale"
+  | "overdue"
+  | "critical"
+  | "bugs"
+  | "risks"
+  | "productBugs"
+  | "all";
+
+export interface ItemDetail {
+  id: number;
+  title: string;
+  type: string;
+  state: string;
+  assignedTo: string;
+  severity: string;
+  priority: string;
+  tags: string;
+  dueDate: string | null;
+  changedDate: string | null;
+  daysInactive: number;
+  url: string;
+}
+
+function toDetail(org: string, project: string, w: WorkItem): ItemDetail {
+  const assigned = w.fields["System.AssignedTo"] as { displayName?: string } | undefined;
+  const due =
+    str(w, "Microsoft.VSTS.Scheduling.DueDate") || str(w, "Microsoft.VSTS.Scheduling.TargetDate");
+  const changed = str(w, "System.ChangedDate");
+  return {
+    id: w.id,
+    title: str(w, "System.Title") || `#${w.id}`,
+    type: str(w, "System.WorkItemType"),
+    state: str(w, "System.State"),
+    assignedTo: assigned?.displayName ?? "Unassigned",
+    severity: str(w, "Microsoft.VSTS.Common.Severity"),
+    priority: String(w.fields["Microsoft.VSTS.Common.Priority"] ?? ""),
+    tags: str(w, "System.Tags"),
+    dueDate: due || null,
+    changedDate: changed || null,
+    daysInactive: daysSince(changed),
+    url: `${org}/${encodeURIComponent(project)}/_workitems/edit/${w.id}`,
+  };
+}
+
+export async function fetchProjectItems(project: string, metric: Metric): Promise<ItemDetail[]> {
+  const orgUrl = process.env["AZURE_DEVOPS_ORG_URL"];
+  const pat = process.env["AZURE_DEVOPS_PAT"];
+  if (!orgUrl || !pat) throw new Error("Azure DevOps is not configured yet.");
+  const org = orgBase(orgUrl);
+
+  const ids = await runWiql(
+    org,
+    project,
+    pat,
+    `SELECT [System.Id] FROM WorkItems
+     WHERE [System.TeamProject] = '${project.replace(/'/g, "''")}'
+       AND [System.State] NOT IN ('Closed','Done','Removed','Resolved')`,
+  );
+  const items = ids.length ? await getWorkItems(org, ids.slice(0, 2000), pat) : [];
+
+  const isTask = (w: WorkItem) =>
+    ["Task", "User Story", "Product Backlog Item", "Requirement"].includes(str(w, "System.WorkItemType"));
+  const isBug = (w: WorkItem) => str(w, "System.WorkItemType") === "Bug";
+  const isRisk = (w: WorkItem) =>
+    ["Risk", "Issue", "Impediment"].includes(str(w, "System.WorkItemType"));
+  const dueOf = (w: WorkItem) =>
+    str(w, "Microsoft.VSTS.Scheduling.DueDate") || str(w, "Microsoft.VSTS.Scheduling.TargetDate");
+
+  const match = (w: WorkItem) => {
+    switch (metric) {
+      case "stale":
+        return isTask(w) && daysSince(str(w, "System.ChangedDate")) >= 14;
+      case "overdue": {
+        const d = dueOf(w);
+        return isTask(w) && !!d && new Date(d).getTime() < Date.now();
+      }
+      case "critical":
+        return (
+          isBug(w) &&
+          (severityOf(w).includes("1 -") || str(w, "System.Tags").toLowerCase().includes("showstopper"))
+        );
+      case "bugs":
+        return isBug(w);
+      case "productBugs":
+        return isBug(w) && str(w, "System.Tags").toLowerCase().includes("product");
+      case "risks":
+        return isRisk(w);
+      default:
+        return true;
+    }
+  };
+
+  return items
+    .filter(match)
+    .map((w) => toDetail(org, project, w))
+    .sort((a, b) => b.daysInactive - a.daysInactive)
+    .slice(0, 300);
 }
 
 export async function fetchDashboard(): Promise<DashboardData> {

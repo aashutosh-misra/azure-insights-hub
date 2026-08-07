@@ -191,14 +191,21 @@ export async function fetchDashboard(): Promise<DashboardData> {
     pat,
   );
 
+  const queue = [...projectList.value];
   const projects: ProjectHealth[] = [];
-  for (const p of projectList.value) {
-    try {
-      projects.push(await projectHealth(org, p, pat));
-    } catch (err) {
-      console.error(`project health failed for ${p.name}:`, err);
+  const worker = async () => {
+    for (;;) {
+      const p = queue.shift();
+      if (!p) return;
+      try {
+        projects.push(await projectHealth(org, p, pat));
+      } catch (err) {
+        console.error(`project health failed for ${p.name}:`, err);
+      }
     }
-  }
+  };
+  await Promise.all(Array.from({ length: 8 }, worker));
+
 
   projects.sort((a, b) => a.name.localeCompare(b.name));
 

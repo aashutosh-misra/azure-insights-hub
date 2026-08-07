@@ -3,7 +3,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useMemo, useState } from "react";
 import { getAzureDashboard } from "@/lib/azure.functions";
-import type { ProjectHealth, Rag } from "@/lib/azure.server";
+import type { Metric, ProjectHealth, Rag } from "@/lib/azure.server";
+import { WorkItemsDialog, type Drill } from "@/components/WorkItemsDialog";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -46,9 +47,11 @@ function RagPill({ rag }: { rag: Rag }) {
 function Chip({
   children,
   tone = "muted",
+  onClick,
 }: {
   children: React.ReactNode;
   tone?: "muted" | "green" | "amber" | "red" | "blue";
+  onClick?: () => void;
 }) {
   const tones = {
     muted: "bg-muted text-muted-foreground",
@@ -57,9 +60,19 @@ function Chip({
     red: "bg-rag-red-bg text-rag-red",
     blue: "bg-rag-blue-bg text-rag-blue",
   } as const;
-  return (
-    <span className={`inline-block rounded-md px-2 py-1 text-xs font-medium ${tones[tone]}`}>{children}</span>
-  );
+  const cls = `inline-block rounded-md px-2 py-1 text-xs font-medium ${tones[tone]}`;
+  if (onClick) {
+    return (
+      <button
+        type="button"
+        onClick={onClick}
+        className={`${cls} cursor-pointer transition hover:brightness-95 hover:ring-1 hover:ring-current/40`}
+      >
+        {children}
+      </button>
+    );
+  }
+  return <span className={cls}>{children}</span>;
 }
 
 function KpiCard({
@@ -88,8 +101,9 @@ function KpiCard({
   );
 }
 
-function Row({ p }: { p: ProjectHealth }) {
+function Row({ p, onDrill }: { p: ProjectHealth; onDrill: (d: Drill) => void }) {
   const [open, setOpen] = useState(false);
+  const drill = (metric: Metric, label: string) => () => onDrill({ project: p.name, metric, label });
   return (
     <>
       <tr className="border-b border-border align-top">
@@ -107,7 +121,9 @@ function Row({ p }: { p: ProjectHealth }) {
           </button>
         </td>
         <td className="px-4 py-4">
-          <RagPill rag={p.calcRag} />
+          <button type="button" onClick={drill("all", "All open work items")} className="cursor-pointer">
+            <RagPill rag={p.calcRag} />
+          </button>
         </td>
         <td className="px-4 py-4">
           <Chip tone={p.schedulePct >= 0 ? "green" : "amber"}>
@@ -115,31 +131,44 @@ function Row({ p }: { p: ProjectHealth }) {
           </Chip>
         </td>
         <td className="px-4 py-4">
-          <Chip tone={p.staleTasks > 0 ? "amber" : "green"}>{p.staleTasks} stale</Chip>
+          <Chip tone={p.staleTasks > 0 ? "amber" : "green"} onClick={drill("stale", "Stale tasks")}>
+            {p.staleTasks} stale
+          </Chip>
           {p.staleTasks > 0 && <p className="mt-1 text-[11px] text-muted-foreground">14+ days inactive</p>}
         </td>
         <td className="px-4 py-4">
-          <Chip tone={p.overdueTasks > 0 ? "red" : "green"}>{p.overdueTasks} overdue</Chip>
+          <Chip tone={p.overdueTasks > 0 ? "red" : "green"} onClick={drill("overdue", "Overdue tasks")}>
+            {p.overdueTasks} overdue
+          </Chip>
           {p.overdueTasks > 0 && <p className="mt-1 text-[11px] text-muted-foreground">past due date</p>}
         </td>
         <td className="px-4 py-4">
-          <Chip tone={p.criticalBugs > 0 || p.showstopperBugs > 0 ? "red" : "green"}>
+          <Chip
+            tone={p.criticalBugs > 0 || p.showstopperBugs > 0 ? "red" : "green"}
+            onClick={drill("critical", "Critical & showstopper bugs")}
+          >
             Critical: {p.criticalBugs} · SS: {p.showstopperBugs}
           </Chip>
         </td>
         <td className="px-4 py-4">
-          <Chip tone={p.openBugs > 0 ? "amber" : "green"}>{p.openBugs} open</Chip>
+          <Chip tone={p.openBugs > 0 ? "amber" : "green"} onClick={drill("bugs", "Open bugs")}>
+            {p.openBugs} open
+          </Chip>
         </td>
         <td className="px-4 py-4">
-          <Chip tone={p.openRisks > 0 ? "red" : "green"}>
+          <Chip tone={p.openRisks > 0 ? "red" : "green"} onClick={drill("risks", "Open risks & issues")}>
             {p.openRisks} open{p.openRisks > 0 ? ` · H:${p.riskHigh} M:${p.riskMedium}` : " risks"}
           </Chip>
         </td>
         <td className="px-4 py-4">
-          <Chip tone={p.productBugs > 0 ? "amber" : "green"}>{p.productBugs} open</Chip>
+          <Chip tone={p.productBugs > 0 ? "amber" : "green"} onClick={drill("productBugs", "Product bugs")}>
+            {p.productBugs} open
+          </Chip>
         </td>
         <td className="px-4 py-4">
-          <Chip tone="blue">{p.phase}</Chip>
+          <Chip tone="blue" onClick={drill("all", "All open work items")}>
+            {p.phase}
+          </Chip>
         </td>
         <td className="px-4 py-4 text-xs text-muted-foreground">
           {p.lastActivity ? new Date(p.lastActivity).toLocaleDateString() : "—"}
@@ -180,6 +209,7 @@ function Dashboard() {
     refetchOnWindowFocus: false,
   });
 
+  const [drill, setDrill] = useState<Drill | null>(null);
   const [rag, setRag] = useState<"ALL" | Rag>("ALL");
   const [search, setSearch] = useState("");
 
@@ -302,7 +332,7 @@ function Dashboard() {
               </thead>
               <tbody>
                 {filtered.map((p) => (
-                  <Row key={p.id} p={p} />
+                  <Row key={p.id} p={p} onDrill={setDrill} />
                 ))}
                 {!filtered.length && (
                   <tr>
@@ -321,6 +351,8 @@ function Dashboard() {
           </p>
         </section>
       </main>
+
+      <WorkItemsDialog drill={drill} onClose={() => setDrill(null)} />
     </div>
   );
 }

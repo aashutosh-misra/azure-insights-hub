@@ -121,7 +121,7 @@ async function projectHealth(
        AND [System.State] NOT IN ('Closed','Done','Removed','Resolved')`,
   );
 
-  const items = ids.length ? await getWorkItems(org, ids, pat) : [];
+  const items = ids.length ? await getWorkItems(org, ids.slice(0, 2000), pat) : [];
 
   const tasks = items.filter((w) =>
     ["Task", "User Story", "Product Backlog Item", "Requirement"].includes(str(w, "System.WorkItemType")),

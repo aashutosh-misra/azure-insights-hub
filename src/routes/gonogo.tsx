@@ -52,7 +52,7 @@ function GoNoGoPage() {
     setShowModal(false);
   }
 
-  const tone = VERDICT_TONE[result.verdict];
+  const tone = VERDICT_TONE[result.verdict] ?? "amber";
 
   return (
     <div>

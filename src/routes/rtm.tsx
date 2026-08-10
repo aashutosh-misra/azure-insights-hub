@@ -162,7 +162,7 @@ function RtmPage() {
             {rows.map(({ req, mod, linked, cov }) => (
               <tr key={req.id} className="hover:bg-accent/40">
                 <Td className="font-semibold">{req.reqId}</Td>
-                <Td className="max-w-xs truncate" title={req.title}>{req.title}</Td>
+                <Td className="max-w-xs"><span className="block truncate" title={req.title}>{req.title}</span></Td>
                 <Td><Badge tone="muted">{mod?.name ?? "—"}</Badge></Td>
                 <Td><Badge tone={req.priority === "Critical" || req.priority === "High" ? "red" : req.priority === "Medium" ? "amber" : "green"}>{req.priority}</Badge></Td>
                 <Td>

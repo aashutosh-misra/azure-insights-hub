@@ -155,7 +155,7 @@ function TestCasesPage() {
       const text = String(reader.result || "");
       const lines = text.split(/\r?\n/).filter(Boolean);
       if (lines.length < 2) return;
-      const header = lines[0].split(",").map((h) => h.replace(/"/g, "").trim());
+      const header = (lines[0] ?? "").split(",").map((h) => h.replace(/"/g, "").trim());
       const rows = lines.slice(1).map((line) => {
         const vals = line.split(",").map((v) => v.replace(/^"|"$/g, ""));
         const rec: Record<string, string> = {};

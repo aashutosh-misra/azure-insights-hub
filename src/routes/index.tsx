@@ -114,7 +114,7 @@ function DashboardPage() {
     <div className="space-y-4">
       <PageHeader
         title="QA Delivery Dashboard"
-       
+        subtitle={`${project === "All" ? "All projects" : project} · ${modules.length} modules · ${cases.length} test cases`}
       />
 
       <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">

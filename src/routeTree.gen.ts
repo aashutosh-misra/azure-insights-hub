@@ -9,10 +9,29 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as IndexRouteImport } from './routes/index'
+import { Route as DefectsRouteImport } from './routes/defects'
+import { Route as ModulesRouteImport } from './routes/modules'
 import { Route as PortfolioRouteImport } from './routes/portfolio'
 import { Route as ProjecthealthRouteImport } from './routes/projecthealth'
+import { Route as RisksRouteImport } from './routes/risks'
 import { Route as TestcasesRouteImport } from './routes/testcases'
 
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DefectsRoute = DefectsRouteImport.update({
+  id: '/defects',
+  path: '/defects',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ModulesRoute = ModulesRouteImport.update({
+  id: '/modules',
+  path: '/modules',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PortfolioRoute = PortfolioRouteImport.update({
   id: '/portfolio',
   path: '/portfolio',
@@ -23,6 +42,11 @@ const ProjecthealthRoute = ProjecthealthRouteImport.update({
   path: '/projecthealth',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RisksRoute = RisksRouteImport.update({
+  id: '/risks',
+  path: '/risks',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TestcasesRoute = TestcasesRouteImport.update({
   id: '/testcases',
   path: '/testcases',
@@ -30,37 +54,96 @@ const TestcasesRoute = TestcasesRouteImport.update({
 } as any)
 
 export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/defects': typeof DefectsRoute
+  '/modules': typeof ModulesRoute
   '/portfolio': typeof PortfolioRoute
   '/projecthealth': typeof ProjecthealthRoute
+  '/risks': typeof RisksRoute
   '/testcases': typeof TestcasesRoute
 }
 export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/defects': typeof DefectsRoute
+  '/modules': typeof ModulesRoute
   '/portfolio': typeof PortfolioRoute
   '/projecthealth': typeof ProjecthealthRoute
+  '/risks': typeof RisksRoute
   '/testcases': typeof TestcasesRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/defects': typeof DefectsRoute
+  '/modules': typeof ModulesRoute
   '/portfolio': typeof PortfolioRoute
   '/projecthealth': typeof ProjecthealthRoute
+  '/risks': typeof RisksRoute
   '/testcases': typeof TestcasesRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/portfolio' | '/projecthealth' | '/testcases'
+  fullPaths:
+    | '/'
+    | '/defects'
+    | '/modules'
+    | '/portfolio'
+    | '/projecthealth'
+    | '/risks'
+    | '/testcases'
   fileRoutesByTo: FileRoutesByTo
-  to: '/portfolio' | '/projecthealth' | '/testcases'
-  id: '__root__' | '/portfolio' | '/projecthealth' | '/testcases'
+  to:
+    | '/'
+    | '/defects'
+    | '/modules'
+    | '/portfolio'
+    | '/projecthealth'
+    | '/risks'
+    | '/testcases'
+  id:
+    | '__root__'
+    | '/'
+    | '/defects'
+    | '/modules'
+    | '/portfolio'
+    | '/projecthealth'
+    | '/risks'
+    | '/testcases'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  DefectsRoute: typeof DefectsRoute
+  ModulesRoute: typeof ModulesRoute
   PortfolioRoute: typeof PortfolioRoute
   ProjecthealthRoute: typeof ProjecthealthRoute
+  RisksRoute: typeof RisksRoute
   TestcasesRoute: typeof TestcasesRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/defects': {
+      id: '/defects'
+      path: '/defects'
+      fullPath: '/defects'
+      preLoaderRoute: typeof DefectsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/modules': {
+      id: '/modules'
+      path: '/modules'
+      fullPath: '/modules'
+      preLoaderRoute: typeof ModulesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/portfolio': {
       id: '/portfolio'
       path: '/portfolio'
@@ -75,6 +158,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProjecthealthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/risks': {
+      id: '/risks'
+      path: '/risks'
+      fullPath: '/risks'
+      preLoaderRoute: typeof RisksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/testcases': {
       id: '/testcases'
       path: '/testcases'
@@ -86,8 +176,12 @@ declare module '@tanstack/react-router' {
 }
 
 const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  DefectsRoute: DefectsRoute,
+  ModulesRoute: ModulesRoute,
   PortfolioRoute: PortfolioRoute,
   ProjecthealthRoute: ProjecthealthRoute,
+  RisksRoute: RisksRoute,
   TestcasesRoute: TestcasesRoute,
 }
 export const routeTree = rootRouteImport

@@ -114,18 +114,18 @@ function DashboardPage() {
     <div className="space-y-4">
       <PageHeader
         title="QA Delivery Dashboard"
-        subtitle={`${project === "All" ? "All projects" : project} · ${modules.length} modules · ${cases.length} test cases`}
+       
       />
 
       <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <Kpi label="Execution progress" value={`${st.execPct}%`} hint={`${st.executed} of ${st.total} executed`} tone="blue" />
-        <Kpi label="Pass rate" value={`${st.passPct}%`} hint={`${st.passed} passed · ${st.failed} failed`} tone={st.passPct >= 90 ? "green" : st.passPct >= 75 ? "amber" : "red"} />
-        <Kpi label="Open defects" value={openDefects.length} hint={`${critical} critical · ${breaches} SLA breached`} tone={critical ? "red" : openDefects.length ? "amber" : "green"} />
-        <Kpi label="Requirement coverage" value={`${coveragePct}%`} hint={`${doneReqs} of ${totalReqs} requirements`} tone={coveragePct >= 85 ? "green" : "amber"} />
+        <Kpi label="Execution progress" value={`${st.execPct}%`} sub={`${st.executed} of ${st.total} executed`} tone="blue" />
+        <Kpi label="Pass rate" value={`${st.passPct}%`} sub={`${st.passed} passed · ${st.failed} failed`} tone={st.passPct >= 90 ? "green" : st.passPct >= 75 ? "amber" : "red"} />
+        <Kpi label="Open defects" value={openDefects.length} sub={`${critical} critical · ${breaches} SLA breached`} tone={critical ? "red" : openDefects.length ? "amber" : "green"} />
+        <Kpi label="Requirement coverage" value={`${coveragePct}%`} sub={`${doneReqs} of ${totalReqs} requirements`} tone={coveragePct >= 85 ? "green" : "amber"} />
       </section>
 
       <section className="grid gap-3 lg:grid-cols-3">
-        <Card title="Execution trend" subtitle="Cumulative execution history" className="lg:col-span-2">
+        <Card title="Execution trend" className="lg:col-span-2">
           <div className="h-60">
             {trend.length ? (
               <ResponsiveContainer width="100%" height="100%">
@@ -145,7 +145,7 @@ function DashboardPage() {
           </div>
         </Card>
 
-        <Card title="Release readiness" subtitle="Go/No-Go gate score">
+        <Card title="Release readiness">
           <div className="flex items-center gap-3">
             <div className="text-4xl font-black text-foreground">{gate.score}</div>
             <Badge tone={verdictTone[gate.verdict]}>{gate.verdict}</Badge>
@@ -168,7 +168,7 @@ function DashboardPage() {
       </section>
 
       <section className="grid gap-3 lg:grid-cols-3">
-        <Card title="Status mix" subtitle="Test case outcomes">
+        <Card title="Status mix">
           <div className="h-52">
             {statusMix.length ? (
               <ResponsiveContainer width="100%" height="100%">
@@ -195,7 +195,7 @@ function DashboardPage() {
           </div>
         </Card>
 
-        <Card title="Execution by module" subtitle="Executed vs pending" className="lg:col-span-2">
+        <Card title="Execution by module" className="lg:col-span-2">
           <div className="h-52">
             {byModule.length ? (
               <ResponsiveContainer width="100%" height="100%">
@@ -216,7 +216,7 @@ function DashboardPage() {
       </section>
 
       <section className="grid gap-3 lg:grid-cols-2">
-        <Card title="Project health" subtitle="RAG score by project">
+        <Card title="Project health">
           <Table head={["Project", "RAG", "Score", "Exec", "Pass", "Open", "SLA"]}>
             {projectCards.map((p) => (
               <tr key={p.project} className="border-b border-border last:border-0">
@@ -241,7 +241,7 @@ function DashboardPage() {
           </Table>
         </Card>
 
-        <Card title="Needs attention" subtitle="Critical, high or SLA-breached defects">
+        <Card title="Needs attention">
           <Table head={["Defect", "Severity", "Module", "Age", "SLA"]}>
             {attention.map((d) => (
               <tr key={d.id} className="border-b border-border last:border-0">
@@ -274,7 +274,7 @@ function DashboardPage() {
       </section>
 
       <section className="grid gap-3 lg:grid-cols-3">
-        <Card title="Top recommendations" subtitle="Derived from live QA signals" className="lg:col-span-2">
+        <Card title="Top recommendations" className="lg:col-span-2">
           <ul className="space-y-2">
             {recs.slice(0, 5).map((r) => (
               <li key={r.title} className="flex gap-2 rounded-md border border-border px-3 py-2">
@@ -292,7 +292,7 @@ function DashboardPage() {
           </Link>
         </Card>
 
-        <Card title="Workload" subtitle="Task assignments">
+        <Card title="Workload">
           <div className="grid grid-cols-2 gap-2">
             <Kpi label="Open tasks" value={openTasks.length} tone="blue" />
             <Kpi label="Overdue" value={overdueTasks} tone={overdueTasks ? "red" : "green"} />

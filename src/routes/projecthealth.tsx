@@ -6,7 +6,7 @@ import { getAzureDashboard } from "@/lib/azure.functions";
 import type { Metric, ProjectHealth, Rag } from "@/lib/azure.server";
 import { WorkItemsDialog, type Drill } from "@/components/WorkItemsDialog";
 
-export const Route = createFileRoute("/")({
+export const Route = createFileRoute("/projecthealth")({
   head: () => ({
     meta: [
       { title: "US Project Health Dashboard | Azure Boards RAG Tracker" },

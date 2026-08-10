@@ -137,7 +137,7 @@ function TestCasesPage() {
 
   function exportCsv() {
     const header = ["id", "title", "moduleId", "type", "priority", "assignee", "status", "automation", "defect"];
-    const rows = filtered.map((c) => header.map((h) => JSON.stringify((c as Record<string, unknown>)[h] ?? "")).join(","));
+    const rows = filtered.map((c) => header.map((h) => JSON.stringify((c as unknown as Record<string, unknown>)[h] ?? "")).join(","));
     const csv = [header.join(","), ...rows].join("\n");
     const blob = new Blob([csv], { type: "text/csv" });
     const url = URL.createObjectURL(blob);

@@ -9,9 +9,15 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as PortfolioRouteImport } from './routes/portfolio'
 import { Route as ProjecthealthRouteImport } from './routes/projecthealth'
 import { Route as TestcasesRouteImport } from './routes/testcases'
 
+const PortfolioRoute = PortfolioRouteImport.update({
+  id: '/portfolio',
+  path: '/portfolio',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProjecthealthRoute = ProjecthealthRouteImport.update({
   id: '/projecthealth',
   path: '/projecthealth',
@@ -24,33 +30,44 @@ const TestcasesRoute = TestcasesRouteImport.update({
 } as any)
 
 export interface FileRoutesByFullPath {
+  '/portfolio': typeof PortfolioRoute
   '/projecthealth': typeof ProjecthealthRoute
   '/testcases': typeof TestcasesRoute
 }
 export interface FileRoutesByTo {
+  '/portfolio': typeof PortfolioRoute
   '/projecthealth': typeof ProjecthealthRoute
   '/testcases': typeof TestcasesRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
+  '/portfolio': typeof PortfolioRoute
   '/projecthealth': typeof ProjecthealthRoute
   '/testcases': typeof TestcasesRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/projecthealth' | '/testcases'
+  fullPaths: '/portfolio' | '/projecthealth' | '/testcases'
   fileRoutesByTo: FileRoutesByTo
-  to: '/projecthealth' | '/testcases'
-  id: '__root__' | '/projecthealth' | '/testcases'
+  to: '/portfolio' | '/projecthealth' | '/testcases'
+  id: '__root__' | '/portfolio' | '/projecthealth' | '/testcases'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
+  PortfolioRoute: typeof PortfolioRoute
   ProjecthealthRoute: typeof ProjecthealthRoute
   TestcasesRoute: typeof TestcasesRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/portfolio': {
+      id: '/portfolio'
+      path: '/portfolio'
+      fullPath: '/portfolio'
+      preLoaderRoute: typeof PortfolioRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/projecthealth': {
       id: '/projecthealth'
       path: '/projecthealth'
@@ -69,6 +86,7 @@ declare module '@tanstack/react-router' {
 }
 
 const rootRouteChildren: RootRouteChildren = {
+  PortfolioRoute: PortfolioRoute,
   ProjecthealthRoute: ProjecthealthRoute,
   TestcasesRoute: TestcasesRoute,
 }

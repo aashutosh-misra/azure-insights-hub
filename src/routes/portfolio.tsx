@@ -50,8 +50,10 @@ function PortfolioPage() {
   const rags = useMemo(() => projects.map((p) => projectRag(state, p)), [projects, state]);
 
   const ragCounts = useMemo(() => {
-    const c = { GREEN: 0, AMBER: 0, RED: 0 } as Record<string, number>;
-    rags.forEach((r) => (c[r.rag] += 1));
+    const c: Record<string, number> = { GREEN: 0, AMBER: 0, RED: 0 };
+    rags.forEach((r) => {
+      c[r.rag] = (c[r.rag] ?? 0) + 1;
+    });
     return c;
   }, [rags]);
 
@@ -77,9 +79,9 @@ function PortfolioPage() {
         <div className="space-y-3">
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             <Kpi label="Projects" value={rags.length} tone="blue" />
-            <Kpi label="Green" value={ragCounts.GREEN} tone="green" />
-            <Kpi label="Amber" value={ragCounts.AMBER} tone="amber" />
-            <Kpi label="Red" value={ragCounts.RED} tone="red" />
+            <Kpi label="Green" value={ragCounts['GREEN']} tone="green" />
+            <Kpi label="Amber" value={ragCounts['AMBER']} tone="amber" />
+            <Kpi label="Red" value={ragCounts['RED']} tone="red" />
           </div>
 
           <div className="grid grid-cols-1 gap-3 lg:grid-cols-3">

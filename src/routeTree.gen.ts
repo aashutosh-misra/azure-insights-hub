@@ -11,11 +11,16 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DefectsRouteImport } from './routes/defects'
+import { Route as ExecutionRouteImport } from './routes/execution'
+import { Route as GonogoRouteImport } from './routes/gonogo'
 import { Route as ModulesRouteImport } from './routes/modules'
 import { Route as PortfolioRouteImport } from './routes/portfolio'
 import { Route as ProjecthealthRouteImport } from './routes/projecthealth'
 import { Route as RisksRouteImport } from './routes/risks'
+import { Route as RtmRouteImport } from './routes/rtm'
+import { Route as TasksRouteImport } from './routes/tasks'
 import { Route as TestcasesRouteImport } from './routes/testcases'
+import { Route as TestplansRouteImport } from './routes/testplans'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -25,6 +30,16 @@ const IndexRoute = IndexRouteImport.update({
 const DefectsRoute = DefectsRouteImport.update({
   id: '/defects',
   path: '/defects',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ExecutionRoute = ExecutionRouteImport.update({
+  id: '/execution',
+  path: '/execution',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GonogoRoute = GonogoRouteImport.update({
+  id: '/gonogo',
+  path: '/gonogo',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ModulesRoute = ModulesRouteImport.update({
@@ -47,78 +62,128 @@ const RisksRoute = RisksRouteImport.update({
   path: '/risks',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RtmRoute = RtmRouteImport.update({
+  id: '/rtm',
+  path: '/rtm',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TasksRoute = TasksRouteImport.update({
+  id: '/tasks',
+  path: '/tasks',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TestcasesRoute = TestcasesRouteImport.update({
   id: '/testcases',
   path: '/testcases',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TestplansRoute = TestplansRouteImport.update({
+  id: '/testplans',
+  path: '/testplans',
   getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/defects': typeof DefectsRoute
+  '/execution': typeof ExecutionRoute
+  '/gonogo': typeof GonogoRoute
   '/modules': typeof ModulesRoute
   '/portfolio': typeof PortfolioRoute
   '/projecthealth': typeof ProjecthealthRoute
   '/risks': typeof RisksRoute
+  '/rtm': typeof RtmRoute
+  '/tasks': typeof TasksRoute
   '/testcases': typeof TestcasesRoute
+  '/testplans': typeof TestplansRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/defects': typeof DefectsRoute
+  '/execution': typeof ExecutionRoute
+  '/gonogo': typeof GonogoRoute
   '/modules': typeof ModulesRoute
   '/portfolio': typeof PortfolioRoute
   '/projecthealth': typeof ProjecthealthRoute
   '/risks': typeof RisksRoute
+  '/rtm': typeof RtmRoute
+  '/tasks': typeof TasksRoute
   '/testcases': typeof TestcasesRoute
+  '/testplans': typeof TestplansRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/defects': typeof DefectsRoute
+  '/execution': typeof ExecutionRoute
+  '/gonogo': typeof GonogoRoute
   '/modules': typeof ModulesRoute
   '/portfolio': typeof PortfolioRoute
   '/projecthealth': typeof ProjecthealthRoute
   '/risks': typeof RisksRoute
+  '/rtm': typeof RtmRoute
+  '/tasks': typeof TasksRoute
   '/testcases': typeof TestcasesRoute
+  '/testplans': typeof TestplansRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/defects'
+    | '/execution'
+    | '/gonogo'
     | '/modules'
     | '/portfolio'
     | '/projecthealth'
     | '/risks'
+    | '/rtm'
+    | '/tasks'
     | '/testcases'
+    | '/testplans'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/defects'
+    | '/execution'
+    | '/gonogo'
     | '/modules'
     | '/portfolio'
     | '/projecthealth'
     | '/risks'
+    | '/rtm'
+    | '/tasks'
     | '/testcases'
+    | '/testplans'
   id:
     | '__root__'
     | '/'
     | '/defects'
+    | '/execution'
+    | '/gonogo'
     | '/modules'
     | '/portfolio'
     | '/projecthealth'
     | '/risks'
+    | '/rtm'
+    | '/tasks'
     | '/testcases'
+    | '/testplans'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DefectsRoute: typeof DefectsRoute
+  ExecutionRoute: typeof ExecutionRoute
+  GonogoRoute: typeof GonogoRoute
   ModulesRoute: typeof ModulesRoute
   PortfolioRoute: typeof PortfolioRoute
   ProjecthealthRoute: typeof ProjecthealthRoute
   RisksRoute: typeof RisksRoute
+  RtmRoute: typeof RtmRoute
+  TasksRoute: typeof TasksRoute
   TestcasesRoute: typeof TestcasesRoute
+  TestplansRoute: typeof TestplansRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -135,6 +200,20 @@ declare module '@tanstack/react-router' {
       path: '/defects'
       fullPath: '/defects'
       preLoaderRoute: typeof DefectsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/execution': {
+      id: '/execution'
+      path: '/execution'
+      fullPath: '/execution'
+      preLoaderRoute: typeof ExecutionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gonogo': {
+      id: '/gonogo'
+      path: '/gonogo'
+      fullPath: '/gonogo'
+      preLoaderRoute: typeof GonogoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/modules': {
@@ -165,11 +244,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RisksRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/rtm': {
+      id: '/rtm'
+      path: '/rtm'
+      fullPath: '/rtm'
+      preLoaderRoute: typeof RtmRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/testcases': {
       id: '/testcases'
       path: '/testcases'
       fullPath: '/testcases'
       preLoaderRoute: typeof TestcasesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/testplans': {
+      id: '/testplans'
+      path: '/testplans'
+      fullPath: '/testplans'
+      preLoaderRoute: typeof TestplansRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -178,11 +278,16 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DefectsRoute: DefectsRoute,
+  ExecutionRoute: ExecutionRoute,
+  GonogoRoute: GonogoRoute,
   ModulesRoute: ModulesRoute,
   PortfolioRoute: PortfolioRoute,
   ProjecthealthRoute: ProjecthealthRoute,
   RisksRoute: RisksRoute,
+  RtmRoute: RtmRoute,
+  TasksRoute: TasksRoute,
   TestcasesRoute: TestcasesRoute,
+  TestplansRoute: TestplansRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

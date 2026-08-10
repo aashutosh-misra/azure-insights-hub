@@ -70,6 +70,10 @@
   --color-rag-red-bg: var(--rag-red-bg);
   --color-rag-blue: var(--rag-blue);
   --color-rag-blue-bg: var(--rag-blue-bg);
+  --color-tone-purple: var(--tone-purple);
+  --color-tone-purple-bg: var(--tone-purple-bg);
+  --color-tone-teal: var(--tone-teal);
+  --color-tone-teal-bg: var(--tone-teal-bg);
   --font-sans: var(--font-body);
 }
 
@@ -109,6 +113,10 @@
   --rag-red-bg: oklch(0.958 0.024 22);
   --rag-blue: oklch(0.61 0.135 253);
   --rag-blue-bg: oklch(0.955 0.024 253);
+  --tone-purple: oklch(0.45 0.093 296);
+  --tone-purple-bg: oklch(0.94 0.021 296);
+  --tone-teal: oklch(0.45 0.068 196);
+  --tone-teal-bg: oklch(0.935 0.024 196);
 
   --chart-1: oklch(0.58 0.114 168);
   --chart-2: oklch(0.74 0.148 68);

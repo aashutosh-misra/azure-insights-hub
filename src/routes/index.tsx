@@ -1,358 +1,316 @@
-import { useQuery } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
-import { useServerFn } from "@tanstack/react-start";
-import { useMemo, useState } from "react";
-import { getAzureDashboard } from "@/lib/azure.functions";
-import type { Metric, ProjectHealth, Rag } from "@/lib/azure.server";
-import { WorkItemsDialog, type Drill } from "@/components/WorkItemsDialog";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useMemo } from "react";
+import {
+  Area,
+  AreaChart,
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
+import { Badge, Card, Empty, Kpi, PageHeader, Progress, Table, Td } from "@/components/qa/ui";
+import {
+  daysSince,
+  execStats,
+  fmtDate,
+  goNoGo,
+  moduleById,
+  projectRag,
+  recommendations,
+  scopedDefects,
+  scopedModules,
+  scopedTestCases,
+  slaBreached,
+  STATUS_TONE,
+} from "@/lib/qa/compute";
+import { useQa } from "@/lib/qa/store";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "US Project Health Dashboard | Azure Boards RAG Tracker" },
+      { title: "QA Delivery Intelligence Dashboard" },
       {
         name: "description",
         content:
-          "Live delivery intelligence dashboard: RAG status, stale and overdue tasks, bugs and risks pulled straight from Azure DevOps Boards.",
+          "Live QA delivery command centre: execution progress, pass rate, open defects, SLA breaches, module health and Go/No-Go readiness.",
       },
-      { property: "og:title", content: "US Project Health Dashboard" },
+      { property: "og:title", content: "QA Delivery Intelligence Dashboard" },
       {
         property: "og:description",
-        content: "Live RAG health, stale tasks, overdue work, bugs and risks from Azure DevOps Boards.",
+        content: "Execution progress, defect SLA, module health and release readiness in one view.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  component: Dashboard,
+  component: DashboardPage,
 });
 
-const ragStyles: Record<Rag, string> = {
-  GREEN: "bg-rag-green-bg text-rag-green",
-  AMBER: "bg-rag-amber-bg text-rag-amber",
-  RED: "bg-rag-red-bg text-rag-red",
-};
+const verdictTone = { GO: "green", "CONDITIONAL GO": "amber", "NO-GO": "red" } as const;
 
-function RagPill({ rag }: { rag: Rag }) {
-  return (
-    <span
-      className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-[11px] font-bold tracking-wide ${ragStyles[rag]}`}
-    >
-      <span className="size-1.5 rounded-full bg-current" />
-      {rag}
-    </span>
+function DashboardPage() {
+  const { state } = useQa();
+  const project = state.currentProject;
+
+  const modules = useMemo(() => scopedModules(state), [state]);
+  const cases = useMemo(() => scopedTestCases(state), [state]);
+  const defects = useMemo(() => scopedDefects(state), [state]);
+  const st = useMemo(() => execStats(cases), [cases]);
+  const gate = useMemo(() => goNoGo(state, project), [state, project]);
+  const recs = useMemo(() => recommendations(state), [state]);
+
+  const openDefects = defects.filter((d) => d.status !== "Closed" && d.status !== "Deferred");
+  const critical = openDefects.filter((d) => d.severity === "Critical").length;
+  const breaches = openDefects.filter(slaBreached).length;
+  const openTasks = state.tasks.filter((t) => t.status !== "Completed");
+  const overdueTasks = openTasks.filter((t) => t.due && new Date(t.due).getTime() < Date.now()).length;
+
+  const totalReqs = modules.reduce((n, m) => n + m.totalReqs, 0);
+  const doneReqs = modules.reduce((n, m) => n + m.reqs, 0);
+  const coveragePct = totalReqs ? Math.round((doneReqs / totalReqs) * 100) : 0;
+
+  const trend = state.history.map((h) => ({
+    date: fmtDate(h.date),
+    executed: h.executed,
+    passed: h.passed,
+    failed: h.failed,
+  }));
+
+  const statusMix = [
+    { name: "Pass", value: st.passed, color: "var(--rag-green)" },
+    { name: "Fail", value: st.failed, color: "var(--rag-red)" },
+    { name: "Hold", value: st.blocked, color: "var(--rag-amber)" },
+    { name: "Not executed", value: st.notExecuted, color: "var(--rag-blue)" },
+  ].filter((d) => d.value > 0);
+
+  const byModule = modules
+    .map((m) => {
+      const mc = cases.filter((c) => c.moduleId === m.id);
+      const s = execStats(mc);
+      return {
+        name: m.name.length > 16 ? `${m.name.slice(0, 15)}…` : m.name,
+        executed: s.executed,
+        pending: s.notExecuted,
+      };
+    })
+    .slice(0, 10);
+
+  const projectCards = (project === "All" ? state.projects.map((p) => p.name) : [project]).map((p) =>
+    projectRag(state, p),
   );
-}
 
-function Chip({
-  children,
-  tone = "muted",
-  onClick,
-}: {
-  children: React.ReactNode;
-  tone?: "muted" | "green" | "amber" | "red" | "blue";
-  onClick?: () => void;
-}) {
-  const tones = {
-    muted: "bg-muted text-muted-foreground",
-    green: "bg-rag-green-bg text-rag-green",
-    amber: "bg-rag-amber-bg text-rag-amber",
-    red: "bg-rag-red-bg text-rag-red",
-    blue: "bg-rag-blue-bg text-rag-blue",
-  } as const;
-  const cls = `inline-block rounded-md px-2 py-1 text-xs font-medium ${tones[tone]}`;
-  if (onClick) {
-    return (
-      <button
-        type="button"
-        onClick={onClick}
-        className={`${cls} cursor-pointer transition hover:brightness-95 hover:ring-1 hover:ring-current/40`}
-      >
-        {children}
-      </button>
-    );
-  }
-  return <span className={cls}>{children}</span>;
-}
+  const attention = openDefects
+    .filter((d) => d.severity === "Critical" || d.severity === "High" || slaBreached(d))
+    .sort((a, b) => daysSince(b.createdAt) - daysSince(a.createdAt))
+    .slice(0, 8);
 
-function KpiCard({
-  label,
-  value,
-  hint,
-  accent,
-}: {
-  label: string;
-  value: number | string;
-  hint: string;
-  accent: "green" | "amber" | "red" | "blue";
-}) {
-  const bar = {
-    green: "border-l-rag-green bg-rag-green-bg",
-    amber: "border-l-rag-amber bg-rag-amber-bg",
-    red: "border-l-rag-red bg-rag-red-bg",
-    blue: "border-l-rag-blue bg-rag-blue-bg",
-  }[accent];
   return (
-    <div className={`border-l-4 px-5 py-4 ${bar}`}>
-      <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">{label}</p>
-      <p className="mt-1 text-3xl font-bold text-foreground">{value}</p>
-      <p className="mt-1 text-xs text-muted-foreground">{hint}</p>
-    </div>
-  );
-}
+    <div className="space-y-4">
+      <PageHeader
+        title="QA Delivery Dashboard"
+        subtitle={`${project === "All" ? "All projects" : project} · ${modules.length} modules · ${cases.length} test cases`}
+      />
 
-function Row({ p, onDrill }: { p: ProjectHealth; onDrill: (d: Drill) => void }) {
-  const [open, setOpen] = useState(false);
-  const drill = (metric: Metric, label: string) => () => onDrill({ project: p.name, metric, label });
-  return (
-    <>
-      <tr className="border-b border-border align-top">
-        <td className="px-4 py-4">
-          <button
-            onClick={() => setOpen((o) => !o)}
-            className="flex items-start gap-2 text-left"
-            aria-expanded={open}
-          >
-            <span className="mt-1 text-muted-foreground">{open ? "▾" : "›"}</span>
-            <span>
-              <span className="block text-sm font-semibold uppercase text-rag-red">{p.name}</span>
-              <span className="block text-xs text-muted-foreground">{p.processTemplate}</span>
-            </span>
-          </button>
-        </td>
-        <td className="px-4 py-4">
-          <button type="button" onClick={drill("all", "All open work items")} className="cursor-pointer">
-            <RagPill rag={p.calcRag} />
-          </button>
-        </td>
-        <td className="px-4 py-4">
-          <Chip tone={p.schedulePct >= 0 ? "green" : "amber"}>
-            {Math.abs(p.schedulePct)}% {p.schedulePct >= 0 ? "ahead of" : "behind"} schedule
-          </Chip>
-        </td>
-        <td className="px-4 py-4">
-          <Chip tone={p.staleTasks > 0 ? "amber" : "green"} onClick={drill("stale", "Stale tasks")}>
-            {p.staleTasks} stale
-          </Chip>
-          {p.staleTasks > 0 && <p className="mt-1 text-[11px] text-muted-foreground">14+ days inactive</p>}
-        </td>
-        <td className="px-4 py-4">
-          <Chip tone={p.overdueTasks > 0 ? "red" : "green"} onClick={drill("overdue", "Overdue tasks")}>
-            {p.overdueTasks} overdue
-          </Chip>
-          {p.overdueTasks > 0 && <p className="mt-1 text-[11px] text-muted-foreground">past due date</p>}
-        </td>
-        <td className="px-4 py-4">
-          <Chip
-            tone={p.criticalBugs > 0 || p.showstopperBugs > 0 ? "red" : "green"}
-            onClick={drill("critical", "Critical & showstopper bugs")}
-          >
-            Critical: {p.criticalBugs} · SS: {p.showstopperBugs}
-          </Chip>
-        </td>
-        <td className="px-4 py-4">
-          <Chip tone={p.openBugs > 0 ? "amber" : "green"} onClick={drill("bugs", "Open bugs")}>
-            {p.openBugs} open
-          </Chip>
-        </td>
-        <td className="px-4 py-4">
-          <Chip tone={p.openRisks > 0 ? "red" : "green"} onClick={drill("risks", "Open risks & issues")}>
-            {p.openRisks} open{p.openRisks > 0 ? ` · H:${p.riskHigh} M:${p.riskMedium}` : " risks"}
-          </Chip>
-        </td>
-        <td className="px-4 py-4">
-          <Chip tone={p.productBugs > 0 ? "amber" : "green"} onClick={drill("productBugs", "Product bugs")}>
-            {p.productBugs} open
-          </Chip>
-        </td>
-        <td className="px-4 py-4">
-          <Chip tone="blue" onClick={drill("all", "All open work items")}>
-            {p.phase}
-          </Chip>
-        </td>
-        <td className="px-4 py-4 text-xs text-muted-foreground">
-          {p.lastActivity ? new Date(p.lastActivity).toLocaleDateString() : "—"}
-        </td>
-      </tr>
-      {open && (
-        <tr className="border-b border-border bg-secondary/60">
-          <td colSpan={11} className="px-10 py-4">
-            <dl className="grid grid-cols-2 gap-x-10 gap-y-2 text-xs sm:grid-cols-4">
-              {[
-                ["Project ID", p.id],
-                ["Calculated RAG", p.calcRag],
-                ["High risks", p.riskHigh],
-                ["Medium risks", p.riskMedium],
-                ["Showstopper bugs", p.showstopperBugs],
-                ["Product-tagged bugs", p.productBugs],
-                ["Stale threshold", "14 days without a change"],
-                ["Last work item change", p.lastActivity ? new Date(p.lastActivity).toLocaleString() : "—"],
-              ].map(([k, v]) => (
-                <div key={String(k)}>
-                  <dt className="text-muted-foreground">{k}</dt>
-                  <dd className="font-medium text-foreground">{String(v)}</dd>
+      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <Kpi label="Execution progress" value={`${st.execPct}%`} sub={`${st.executed} of ${st.total} executed`} tone="blue" />
+        <Kpi label="Pass rate" value={`${st.passPct}%`} sub={`${st.passed} passed · ${st.failed} failed`} tone={st.passPct >= 90 ? "green" : st.passPct >= 75 ? "amber" : "red"} />
+        <Kpi label="Open defects" value={openDefects.length} sub={`${critical} critical · ${breaches} SLA breached`} tone={critical ? "red" : openDefects.length ? "amber" : "green"} />
+        <Kpi label="Requirement coverage" value={`${coveragePct}%`} sub={`${doneReqs} of ${totalReqs} requirements`} tone={coveragePct >= 85 ? "green" : "amber"} />
+      </section>
+
+      <section className="grid gap-3 lg:grid-cols-3">
+        <Card title="Execution trend" className="lg:col-span-2">
+          <div className="h-60">
+            {trend.length ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={trend} margin={{ top: 8, right: 8, left: -20, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                  <XAxis dataKey="date" tick={{ fontSize: 10 }} stroke="var(--muted-foreground)" />
+                  <YAxis tick={{ fontSize: 10 }} stroke="var(--muted-foreground)" />
+                  <Tooltip contentStyle={{ fontSize: 11, borderRadius: 8 }} />
+                  <Area type="monotone" dataKey="executed" stroke="var(--rag-blue)" fill="var(--rag-blue-bg)" strokeWidth={2} />
+                  <Area type="monotone" dataKey="passed" stroke="var(--rag-green)" fill="var(--rag-green-bg)" strokeWidth={2} />
+                  <Area type="monotone" dataKey="failed" stroke="var(--rag-red)" fill="var(--rag-red-bg)" strokeWidth={2} />
+                </AreaChart>
+              </ResponsiveContainer>
+            ) : (
+              <Empty text="No execution history yet." />
+            )}
+          </div>
+        </Card>
+
+        <Card title="Release readiness">
+          <div className="flex items-center gap-3">
+            <div className="text-4xl font-black text-foreground">{gate.score}</div>
+            <Badge tone={verdictTone[gate.verdict]}>{gate.verdict}</Badge>
+          </div>
+          <div className="mt-3 space-y-2">
+            {gate.criteria.map((c) => (
+              <div key={c.label}>
+                <div className="flex items-center justify-between text-[11.5px]">
+                  <span className="text-muted-foreground">{c.label}</span>
+                  <span className="font-semibold text-foreground">{c.value}</span>
                 </div>
-              ))}
-            </dl>
-          </td>
-        </tr>
-      )}
-    </>
-  );
-}
-
-function Dashboard() {
-  const fetchDashboard = useServerFn(getAzureDashboard);
-  const { data, isFetching, refetch } = useQuery({
-    queryKey: ["azure-dashboard"],
-    queryFn: () => fetchDashboard(),
-    refetchOnWindowFocus: false,
-  });
-
-  const [drill, setDrill] = useState<Drill | null>(null);
-  const [rag, setRag] = useState<"ALL" | Rag>("ALL");
-  const [search, setSearch] = useState("");
-
-  const projects = data?.ok ? data.data.projects : [];
-  const filtered = useMemo(
-    () =>
-      projects.filter(
-        (p) =>
-          (rag === "ALL" || p.calcRag === rag) && p.name.toLowerCase().includes(search.toLowerCase()),
-      ),
-    [projects, rag, search],
-  );
-
-  const green = projects.filter((p) => p.calcRag === "GREEN").length;
-  const amber = projects.filter((p) => p.calcRag === "AMBER").length;
-  const red = projects.filter((p) => p.calcRag === "RED").length;
-  const criticalIssues = projects.reduce((n, p) => n + p.criticalBugs + p.showstopperBugs, 0);
-  const openBugs = projects.reduce((n, p) => n + p.openBugs, 0);
-
-  return (
-    <div className="min-h-screen bg-background">
-      <header className="flex items-center justify-between bg-topbar px-5 py-3 text-topbar-foreground">
-        <div className="flex items-center gap-3">
-          <span className="text-lg font-black tracking-tight">
-            DELIVERY<span className="text-brand">INTEL</span>
-          </span>
-        </div>
-        <button
-          onClick={() => refetch()}
-          disabled={isFetching}
-          className="rounded-md bg-brand px-4 py-2 text-sm font-semibold text-topbar disabled:opacity-60"
-        >
-          {isFetching ? "Refreshing…" : "↻ Refresh"}
-        </button>
-      </header>
-
-      <main className="px-5 py-5">
-        <h1 className="text-xl font-bold text-foreground">US Project Health Dashboard</h1>
-        <p className="mt-1 text-xs text-muted-foreground">
-          {data?.ok
-            ? `Last refreshed: ${new Date(data.data.refreshedAt).toLocaleString()} · Azure Boards · ${
-                data.data.organization
-              } · ${projects.length} active projects`
-            : "Connecting to Azure Boards…"}
-        </p>
-
-        {data && !data.ok && (
-          <div className="mt-4 rounded-lg border border-rag-amber/40 bg-rag-amber-bg px-4 py-3 text-sm text-rag-amber">
-            {data.error}
+                <Progress pct={Math.round((c.earned / c.weight) * 100)} tone={c.pass ? "green" : "amber"} />
+              </div>
+            ))}
           </div>
-        )}
+          <Link to="/gonogo" className="mt-3 inline-block text-[11.5px] font-semibold text-brand hover:underline">
+            Open Go/No-Go gate →
+          </Link>
+        </Card>
+      </section>
 
-        <section className="mt-4 grid gap-px overflow-hidden rounded-lg bg-border md:grid-cols-4">
-          <div className="bg-card">
-            <KpiCard label="Projects on track" value={green} hint={`of ${projects.length} active`} accent="green" />
+      <section className="grid gap-3 lg:grid-cols-3">
+        <Card title="Status mix">
+          <div className="h-52">
+            {statusMix.length ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie data={statusMix} dataKey="value" nameKey="name" innerRadius={45} outerRadius={72} paddingAngle={2}>
+                    {statusMix.map((d) => (
+                      <Cell key={d.name} fill={d.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip contentStyle={{ fontSize: 11, borderRadius: 8 }} />
+                </PieChart>
+              </ResponsiveContainer>
+            ) : (
+              <Empty text="No test cases in scope." />
+            )}
           </div>
-          <div className="bg-card">
-            <KpiCard label="At risk" value={amber} hint="AMBER status" accent="amber" />
+          <div className="flex flex-wrap gap-2">
+            {statusMix.map((d) => (
+              <span key={d.name} className="flex items-center gap-1 text-[11px] text-muted-foreground">
+                <span className="size-2 rounded-full" style={{ background: d.color }} />
+                {d.name} · {d.value}
+              </span>
+            ))}
           </div>
-          <div className="bg-card">
-            <KpiCard label="Critical issues" value={criticalIssues} hint={`${red} RED status`} accent="red" />
-          </div>
-          <div className="bg-card">
-            <KpiCard label="Open bugs" value={openBugs} hint="Active, not closed" accent="blue" />
-          </div>
-        </section>
+        </Card>
 
-        <section className="mt-4 rounded-lg border border-border bg-card">
-          <div className="flex flex-wrap items-center gap-3 border-b border-border px-4 py-3">
-            <label className="text-xs font-semibold text-muted-foreground">RAG</label>
-            <select
-              value={rag}
-              onChange={(e) => setRag(e.target.value as "ALL" | Rag)}
-              className="rounded-md border border-input bg-background px-2 py-1.5 text-sm"
-            >
-              <option value="ALL">All</option>
-              <option value="GREEN">Green</option>
-              <option value="AMBER">Amber</option>
-              <option value="RED">Red</option>
-            </select>
-            <input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search project name…"
-              className="min-w-56 flex-1 rounded-md border border-input bg-background px-3 py-1.5 text-sm"
-            />
-            <button
-              onClick={() => {
-                setRag("ALL");
-                setSearch("");
-              }}
-              className="rounded-md border border-input px-3 py-1.5 text-sm font-medium"
-            >
-              Clear Filters
-            </button>
+        <Card title="Execution by module" className="lg:col-span-2">
+          <div className="h-52">
+            {byModule.length ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={byModule} margin={{ top: 8, right: 8, left: -20, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                  <XAxis dataKey="name" tick={{ fontSize: 9 }} interval={0} angle={-18} height={44} textAnchor="end" stroke="var(--muted-foreground)" />
+                  <YAxis tick={{ fontSize: 10 }} stroke="var(--muted-foreground)" />
+                  <Tooltip contentStyle={{ fontSize: 11, borderRadius: 8 }} />
+                  <Bar dataKey="executed" stackId="a" fill="var(--rag-green)" radius={[0, 0, 0, 0]} />
+                  <Bar dataKey="pending" stackId="a" fill="var(--rag-blue)" radius={[3, 3, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <Empty text="No modules in scope." />
+            )}
           </div>
+        </Card>
+      </section>
 
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[1100px] border-collapse text-left">
-              <thead>
-                <tr className="border-b border-border text-[11px] uppercase tracking-wider text-muted-foreground">
-                  {[
-                    "Project",
-                    "Calc. RAG",
-                    "Schedule",
-                    "Stale tasks",
-                    "Overdue tasks",
-                    "Internal quality",
-                    "Open bugs",
-                    "Risks",
-                    "Product bugs",
-                    "Phase",
-                    "Last activity",
-                  ].map((h) => (
-                    <th key={h} className="px-4 py-3 font-semibold">
-                      {h}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {filtered.map((p) => (
-                  <Row key={p.id} p={p} onDrill={setDrill} />
-                ))}
-                {!filtered.length && (
-                  <tr>
-                    <td colSpan={11} className="px-4 py-10 text-center text-sm text-muted-foreground">
-                      {isFetching ? "Loading Azure Boards data…" : "No projects match these filters."}
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+      <section className="grid gap-3 lg:grid-cols-2">
+        <Card title="Project health">
+          <Table head={["Project", "RAG", "Score", "Exec", "Pass", "Open", "SLA"]}>
+            {projectCards.map((p) => (
+              <tr key={p.project} className="border-b border-border last:border-0">
+                <Td className="font-semibold">{p.project}</Td>
+                <Td>
+                  <Badge tone={p.rag === "GREEN" ? "green" : p.rag === "AMBER" ? "amber" : "red"}>{p.rag}</Badge>
+                </Td>
+                <Td>{p.score}</Td>
+                <Td>{p.execPct}%</Td>
+                <Td>{p.passPct}%</Td>
+                <Td>{p.openDefects}</Td>
+                <Td>{p.slaBreaches}</Td>
+              </tr>
+            ))}
+            {!projectCards.length && (
+              <tr>
+                <td colSpan={7}>
+                  <Empty text="No projects configured." />
+                </td>
+              </tr>
+            )}
+          </Table>
+        </Card>
+
+        <Card title="Needs attention">
+          <Table head={["Defect", "Severity", "Module", "Age", "SLA"]}>
+            {attention.map((d) => (
+              <tr key={d.id} className="border-b border-border last:border-0">
+                <Td>
+                  <span className="font-semibold">{d.defectId}</span>
+                  <span className="block text-[11px] text-muted-foreground">{d.title}</span>
+                </Td>
+                <Td>
+                  <Badge tone={STATUS_TONE[d.severity] ?? "muted"}>{d.severity}</Badge>
+                </Td>
+                <Td>{moduleById(state, d.moduleId)?.name ?? "—"}</Td>
+                <Td>{daysSince(d.createdAt)}d</Td>
+                <Td>
+                  <Badge tone={slaBreached(d) ? "red" : "green"}>{slaBreached(d) ? "Breached" : "Within"}</Badge>
+                </Td>
+              </tr>
+            ))}
+            {!attention.length && (
+              <tr>
+                <td colSpan={5}>
+                  <Empty text="No high-priority defects. Nice." />
+                </td>
+              </tr>
+            )}
+          </Table>
+          <Link to="/defects" className="mt-2 inline-block text-[11.5px] font-semibold text-brand hover:underline">
+            View all defects →
+          </Link>
+        </Card>
+      </section>
+
+      <section className="grid gap-3 lg:grid-cols-3">
+        <Card title="Top recommendations" className="lg:col-span-2">
+          <ul className="space-y-2">
+            {recs.slice(0, 5).map((r) => (
+              <li key={r.title} className="flex gap-2 rounded-md border border-border px-3 py-2">
+                <Badge tone={STATUS_TONE[r.severity] ?? "muted"}>{r.severity}</Badge>
+                <div>
+                  <p className="text-[12.5px] font-semibold text-foreground">{r.title}</p>
+                  <p className="text-[11.5px] text-muted-foreground">{r.detail}</p>
+                </div>
+              </li>
+            ))}
+            {!recs.length && <Empty text="Nothing flagged right now." />}
+          </ul>
+          <Link to="/recommendations" className="mt-2 inline-block text-[11.5px] font-semibold text-brand hover:underline">
+            All recommendations →
+          </Link>
+        </Card>
+
+        <Card title="Workload">
+          <div className="grid grid-cols-2 gap-2">
+            <Kpi label="Open tasks" value={openTasks.length} tone="blue" />
+            <Kpi label="Overdue" value={overdueTasks} tone={overdueTasks ? "red" : "green"} />
           </div>
-
-          <p className="border-t border-border px-4 py-3 text-[11px] text-muted-foreground">
-            RAG is calculated from Azure Boards work items: critical/showstopper bugs and 3+ high risks drive RED;
-            overdue work, 5+ stale items or open high risks drive AMBER.
-          </p>
-        </section>
-      </main>
-
-      <WorkItemsDialog drill={drill} onClose={() => setDrill(null)} />
+          <ul className="mt-3 space-y-1.5">
+            {openTasks.slice(0, 5).map((t) => (
+              <li key={t.id} className="flex items-center justify-between gap-2 text-[11.5px]">
+                <span className="truncate text-foreground">{t.title}</span>
+                <span className="shrink-0 text-muted-foreground">{t.due ? fmtDate(t.due) : "—"}</span>
+              </li>
+            ))}
+            {!openTasks.length && <Empty text="No open tasks." />}
+          </ul>
+          <Link to="/tasks" className="mt-2 inline-block text-[11.5px] font-semibold text-brand hover:underline">
+            Manage tasks →
+          </Link>
+        </Card>
+      </section>
     </div>
   );
 }

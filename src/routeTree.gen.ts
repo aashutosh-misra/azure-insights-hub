@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminbackendRouteImport } from './routes/adminbackend'
 import { Route as DefectsRouteImport } from './routes/defects'
 import { Route as ExecutionRouteImport } from './routes/execution'
 import { Route as GonogoRouteImport } from './routes/gonogo'
@@ -23,10 +24,16 @@ import { Route as RtmRouteImport } from './routes/rtm'
 import { Route as TasksRouteImport } from './routes/tasks'
 import { Route as TestcasesRouteImport } from './routes/testcases'
 import { Route as TestplansRouteImport } from './routes/testplans'
+import { Route as UsersRouteImport } from './routes/users'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminbackendRoute = AdminbackendRouteImport.update({
+  id: '/adminbackend',
+  path: '/adminbackend',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DefectsRoute = DefectsRouteImport.update({
@@ -94,9 +101,15 @@ const TestplansRoute = TestplansRouteImport.update({
   path: '/testplans',
   getParentRoute: () => rootRouteImport,
 } as any)
+const UsersRoute = UsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/adminbackend': typeof AdminbackendRoute
   '/defects': typeof DefectsRoute
   '/execution': typeof ExecutionRoute
   '/gonogo': typeof GonogoRoute
@@ -110,9 +123,11 @@ export interface FileRoutesByFullPath {
   '/tasks': typeof TasksRoute
   '/testcases': typeof TestcasesRoute
   '/testplans': typeof TestplansRoute
+  '/users': typeof UsersRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/adminbackend': typeof AdminbackendRoute
   '/defects': typeof DefectsRoute
   '/execution': typeof ExecutionRoute
   '/gonogo': typeof GonogoRoute
@@ -126,10 +141,12 @@ export interface FileRoutesByTo {
   '/tasks': typeof TasksRoute
   '/testcases': typeof TestcasesRoute
   '/testplans': typeof TestplansRoute
+  '/users': typeof UsersRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/adminbackend': typeof AdminbackendRoute
   '/defects': typeof DefectsRoute
   '/execution': typeof ExecutionRoute
   '/gonogo': typeof GonogoRoute
@@ -143,11 +160,13 @@ export interface FileRoutesById {
   '/tasks': typeof TasksRoute
   '/testcases': typeof TestcasesRoute
   '/testplans': typeof TestplansRoute
+  '/users': typeof UsersRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/adminbackend'
     | '/defects'
     | '/execution'
     | '/gonogo'
@@ -161,9 +180,11 @@ export interface FileRouteTypes {
     | '/tasks'
     | '/testcases'
     | '/testplans'
+    | '/users'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/adminbackend'
     | '/defects'
     | '/execution'
     | '/gonogo'
@@ -177,9 +198,11 @@ export interface FileRouteTypes {
     | '/tasks'
     | '/testcases'
     | '/testplans'
+    | '/users'
   id:
     | '__root__'
     | '/'
+    | '/adminbackend'
     | '/defects'
     | '/execution'
     | '/gonogo'
@@ -193,10 +216,12 @@ export interface FileRouteTypes {
     | '/tasks'
     | '/testcases'
     | '/testplans'
+    | '/users'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminbackendRoute: typeof AdminbackendRoute
   DefectsRoute: typeof DefectsRoute
   ExecutionRoute: typeof ExecutionRoute
   GonogoRoute: typeof GonogoRoute
@@ -210,6 +235,7 @@ export interface RootRouteChildren {
   TasksRoute: typeof TasksRoute
   TestcasesRoute: typeof TestcasesRoute
   TestplansRoute: typeof TestplansRoute
+  UsersRoute: typeof UsersRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -219,6 +245,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/adminbackend': {
+      id: '/adminbackend'
+      path: '/adminbackend'
+      fullPath: '/adminbackend'
+      preLoaderRoute: typeof AdminbackendRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/defects': {
@@ -312,11 +345,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TestplansRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/users': {
+      id: '/users'
+      path: '/users'
+      fullPath: '/users'
+      preLoaderRoute: typeof UsersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminbackendRoute: AdminbackendRoute,
   DefectsRoute: DefectsRoute,
   ExecutionRoute: ExecutionRoute,
   GonogoRoute: GonogoRoute,
@@ -330,6 +371,7 @@ const rootRouteChildren: RootRouteChildren = {
   TasksRoute: TasksRoute,
   TestcasesRoute: TestcasesRoute,
   TestplansRoute: TestplansRoute,
+  UsersRoute: UsersRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

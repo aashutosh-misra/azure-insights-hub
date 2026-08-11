@@ -1,0 +1,101 @@
+{
+  "version": 1,
+  "sdk_version": "0.26.2",
+  "path": "/mcp",
+  "auth": {
+    "type": "oauth",
+    "issuer": "https://ugjxxxcwbhqguoxknuve.supabase.co/auth/v1",
+    "accepted_audiences": [
+      "authenticated"
+    ]
+  },
+  "mcp": {
+    "server": {
+      "name": "azure-insights-hub",
+      "version": "0.1.0",
+      "title": "Azure Insights Hub"
+    },
+    "tools": [
+      {
+        "name": "list_projects",
+        "title": "List Azure projects",
+        "description": "List every Azure DevOps project tracked by this app with its RAG status, schedule progress, open bugs, risks and phase.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": true
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {}
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "get_project_health",
+        "title": "Get project health",
+        "description": "Get the full health snapshot for one Azure DevOps project by name (RAG, schedule, stale/overdue tasks, bugs, risks).",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": true
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "project": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Azure DevOps project name."
+            }
+          },
+          "required": [
+            "project"
+          ]
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_work_items",
+        "title": "List work items",
+        "description": "List the underlying Azure DevOps work items behind a project metric, such as stale tasks, overdue tasks, critical bugs or open risks.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": true
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "project": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Azure DevOps project name."
+            },
+            "metric": {
+              "type": "string",
+              "enum": [
+                "stale",
+                "overdue",
+                "criticalBugs",
+                "openBugs",
+                "openRisks",
+                "activeTasks",
+                "closedTasks"
+              ],
+              "description": "Which metric's work items to return."
+            }
+          },
+          "required": [
+            "project",
+            "metric"
+          ]
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}

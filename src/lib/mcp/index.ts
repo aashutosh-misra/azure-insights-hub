@@ -1,4 +1,4 @@
-import { auth, defineMcp } from "@lovable.dev/mcp-js";
+import { auth, defineMcp, type AnyToolDefinition } from "@lovable.dev/mcp-js";
 import listProjects from "./tools/list-projects";
 import getProjectHealth from "./tools/get-project-health";
 import listWorkItems from "./tools/list-work-items";
@@ -15,5 +15,5 @@ export default defineMcp({
     issuer: `https://${projectRef}.supabase.co/auth/v1`,
     acceptedAudiences: "authenticated",
   }),
-  tools: [listProjects, getProjectHealth, listWorkItems] as never,
+  tools: [listProjects, getProjectHealth, listWorkItems] as AnyToolDefinition[],
 });

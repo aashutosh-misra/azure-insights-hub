@@ -14,6 +14,7 @@ import { Route as AdminbackendRouteImport } from './routes/adminbackend'
 import { Route as DefectsRouteImport } from './routes/defects'
 import { Route as ExecutionRouteImport } from './routes/execution'
 import { Route as GonogoRouteImport } from './routes/gonogo'
+import { Route as McpRouteImport } from './routes/mcp'
 import { Route as ModulesRouteImport } from './routes/modules'
 import { Route as PortfolioRouteImport } from './routes/portfolio'
 import { Route as ProjecthealthRouteImport } from './routes/projecthealth'
@@ -25,6 +26,9 @@ import { Route as TasksRouteImport } from './routes/tasks'
 import { Route as TestcasesRouteImport } from './routes/testcases'
 import { Route as TestplansRouteImport } from './routes/testplans'
 import { Route as UsersRouteImport } from './routes/users'
+import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
+import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
+import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -49,6 +53,11 @@ const ExecutionRoute = ExecutionRouteImport.update({
 const GonogoRoute = GonogoRouteImport.update({
   id: '/gonogo',
   path: '/gonogo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const McpRoute = McpRouteImport.update({
+  id: '/mcp',
+  path: '/mcp',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ModulesRoute = ModulesRouteImport.update({
@@ -106,6 +115,24 @@ const UsersRoute = UsersRouteImport.update({
   path: '/users',
   getParentRoute: () => rootRouteImport,
 } as any)
+const Char91DotmcpChar93ListToolsRoute =
+  Char91DotmcpChar93ListToolsRouteImport.update({
+    id: '/.mcp/list-tools',
+    path: '/.mcp/list-tools',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const Char91DotwellKnownChar93OauthProtectedResourceRoute =
+  Char91DotwellKnownChar93OauthProtectedResourceRouteImport.update({
+    id: '/.well-known/oauth-protected-resource',
+    path: '/.well-known/oauth-protected-resource',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const Char91DotmcpChar93InvokeToolToolRoute =
+  Char91DotmcpChar93InvokeToolToolRouteImport.update({
+    id: '/.mcp/invoke-tool/$tool',
+    path: '/.mcp/invoke-tool/$tool',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -113,6 +140,7 @@ export interface FileRoutesByFullPath {
   '/defects': typeof DefectsRoute
   '/execution': typeof ExecutionRoute
   '/gonogo': typeof GonogoRoute
+  '/mcp': typeof McpRoute
   '/modules': typeof ModulesRoute
   '/portfolio': typeof PortfolioRoute
   '/projecthealth': typeof ProjecthealthRoute
@@ -124,6 +152,9 @@ export interface FileRoutesByFullPath {
   '/testcases': typeof TestcasesRoute
   '/testplans': typeof TestplansRoute
   '/users': typeof UsersRoute
+  '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -131,6 +162,7 @@ export interface FileRoutesByTo {
   '/defects': typeof DefectsRoute
   '/execution': typeof ExecutionRoute
   '/gonogo': typeof GonogoRoute
+  '/mcp': typeof McpRoute
   '/modules': typeof ModulesRoute
   '/portfolio': typeof PortfolioRoute
   '/projecthealth': typeof ProjecthealthRoute
@@ -142,6 +174,9 @@ export interface FileRoutesByTo {
   '/testcases': typeof TestcasesRoute
   '/testplans': typeof TestplansRoute
   '/users': typeof UsersRoute
+  '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -150,6 +185,7 @@ export interface FileRoutesById {
   '/defects': typeof DefectsRoute
   '/execution': typeof ExecutionRoute
   '/gonogo': typeof GonogoRoute
+  '/mcp': typeof McpRoute
   '/modules': typeof ModulesRoute
   '/portfolio': typeof PortfolioRoute
   '/projecthealth': typeof ProjecthealthRoute
@@ -161,6 +197,9 @@ export interface FileRoutesById {
   '/testcases': typeof TestcasesRoute
   '/testplans': typeof TestplansRoute
   '/users': typeof UsersRoute
+  '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -170,6 +209,7 @@ export interface FileRouteTypes {
     | '/defects'
     | '/execution'
     | '/gonogo'
+    | '/mcp'
     | '/modules'
     | '/portfolio'
     | '/projecthealth'
@@ -181,6 +221,9 @@ export interface FileRouteTypes {
     | '/testcases'
     | '/testplans'
     | '/users'
+    | '/.mcp/list-tools'
+    | '/.well-known/oauth-protected-resource'
+    | '/.mcp/invoke-tool/$tool'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -188,6 +231,7 @@ export interface FileRouteTypes {
     | '/defects'
     | '/execution'
     | '/gonogo'
+    | '/mcp'
     | '/modules'
     | '/portfolio'
     | '/projecthealth'
@@ -199,6 +243,9 @@ export interface FileRouteTypes {
     | '/testcases'
     | '/testplans'
     | '/users'
+    | '/.mcp/list-tools'
+    | '/.well-known/oauth-protected-resource'
+    | '/.mcp/invoke-tool/$tool'
   id:
     | '__root__'
     | '/'
@@ -206,6 +253,7 @@ export interface FileRouteTypes {
     | '/defects'
     | '/execution'
     | '/gonogo'
+    | '/mcp'
     | '/modules'
     | '/portfolio'
     | '/projecthealth'
@@ -217,6 +265,9 @@ export interface FileRouteTypes {
     | '/testcases'
     | '/testplans'
     | '/users'
+    | '/.mcp/list-tools'
+    | '/.well-known/oauth-protected-resource'
+    | '/.mcp/invoke-tool/$tool'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -225,6 +276,7 @@ export interface RootRouteChildren {
   DefectsRoute: typeof DefectsRoute
   ExecutionRoute: typeof ExecutionRoute
   GonogoRoute: typeof GonogoRoute
+  McpRoute: typeof McpRoute
   ModulesRoute: typeof ModulesRoute
   PortfolioRoute: typeof PortfolioRoute
   ProjecthealthRoute: typeof ProjecthealthRoute
@@ -236,6 +288,9 @@ export interface RootRouteChildren {
   TestcasesRoute: typeof TestcasesRoute
   TestplansRoute: typeof TestplansRoute
   UsersRoute: typeof UsersRoute
+  Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
+  Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -273,6 +328,13 @@ declare module '@tanstack/react-router' {
       path: '/gonogo'
       fullPath: '/gonogo'
       preLoaderRoute: typeof GonogoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mcp': {
+      id: '/mcp'
+      path: '/mcp'
+      fullPath: '/mcp'
+      preLoaderRoute: typeof McpRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/modules': {
@@ -352,6 +414,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof UsersRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/.mcp/list-tools': {
+      id: '/.mcp/list-tools'
+      path: '/.mcp/list-tools'
+      fullPath: '/.mcp/list-tools'
+      preLoaderRoute: typeof Char91DotmcpChar93ListToolsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/.well-known/oauth-protected-resource': {
+      id: '/.well-known/oauth-protected-resource'
+      path: '/.well-known/oauth-protected-resource'
+      fullPath: '/.well-known/oauth-protected-resource'
+      preLoaderRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/.mcp/invoke-tool/$tool': {
+      id: '/.mcp/invoke-tool/$tool'
+      path: '/.mcp/invoke-tool/$tool'
+      fullPath: '/.mcp/invoke-tool/$tool'
+      preLoaderRoute: typeof Char91DotmcpChar93InvokeToolToolRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -361,6 +444,7 @@ const rootRouteChildren: RootRouteChildren = {
   DefectsRoute: DefectsRoute,
   ExecutionRoute: ExecutionRoute,
   GonogoRoute: GonogoRoute,
+  McpRoute: McpRoute,
   ModulesRoute: ModulesRoute,
   PortfolioRoute: PortfolioRoute,
   ProjecthealthRoute: ProjecthealthRoute,
@@ -372,6 +456,10 @@ const rootRouteChildren: RootRouteChildren = {
   TestcasesRoute: TestcasesRoute,
   TestplansRoute: TestplansRoute,
   UsersRoute: UsersRoute,
+  Char91DotmcpChar93ListToolsRoute: Char91DotmcpChar93ListToolsRoute,
+  Char91DotwellKnownChar93OauthProtectedResourceRoute:
+    Char91DotwellKnownChar93OauthProtectedResourceRoute,
+  Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

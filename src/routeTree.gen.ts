@@ -10,21 +10,36 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminbackendRouteImport } from './routes/adminbackend'
 import { Route as DefectsRouteImport } from './routes/defects'
 import { Route as ExecutionRouteImport } from './routes/execution'
 import { Route as GonogoRouteImport } from './routes/gonogo'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as McpRouteImport } from './routes/mcp'
 import { Route as ModulesRouteImport } from './routes/modules'
 import { Route as PortfolioRouteImport } from './routes/portfolio'
 import { Route as ProjecthealthRouteImport } from './routes/projecthealth'
+import { Route as ProjectsRouteImport } from './routes/projects'
+import { Route as RecommendationsRouteImport } from './routes/recommendations'
 import { Route as RisksRouteImport } from './routes/risks'
 import { Route as RtmRouteImport } from './routes/rtm'
 import { Route as TasksRouteImport } from './routes/tasks'
 import { Route as TestcasesRouteImport } from './routes/testcases'
 import { Route as TestplansRouteImport } from './routes/testplans'
+import { Route as UsersRouteImport } from './routes/users'
+import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
+import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
+import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
+import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminbackendRoute = AdminbackendRouteImport.update({
+  id: '/adminbackend',
+  path: '/adminbackend',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DefectsRoute = DefectsRouteImport.update({
@@ -42,6 +57,16 @@ const GonogoRoute = GonogoRouteImport.update({
   path: '/gonogo',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const McpRoute = McpRouteImport.update({
+  id: '/mcp',
+  path: '/mcp',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ModulesRoute = ModulesRouteImport.update({
   id: '/modules',
   path: '/modules',
@@ -55,6 +80,16 @@ const PortfolioRoute = PortfolioRouteImport.update({
 const ProjecthealthRoute = ProjecthealthRouteImport.update({
   id: '/projecthealth',
   path: '/projecthealth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProjectsRoute = ProjectsRouteImport.update({
+  id: '/projects',
+  path: '/projects',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RecommendationsRoute = RecommendationsRouteImport.update({
+  id: '/recommendations',
+  path: '/recommendations',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RisksRoute = RisksRouteImport.update({
@@ -82,108 +117,206 @@ const TestplansRoute = TestplansRouteImport.update({
   path: '/testplans',
   getParentRoute: () => rootRouteImport,
 } as any)
+const UsersRoute = UsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const Char91DotmcpChar93ListToolsRoute =
+  Char91DotmcpChar93ListToolsRouteImport.update({
+    id: '/.mcp/list-tools',
+    path: '/.mcp/list-tools',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const Char91DotwellKnownChar93OauthProtectedResourceRoute =
+  Char91DotwellKnownChar93OauthProtectedResourceRouteImport.update({
+    id: '/.well-known/oauth-protected-resource',
+    path: '/.well-known/oauth-protected-resource',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const DotlovableOauthConsentRoute = DotlovableOauthConsentRouteImport.update({
+  id: '/.lovable/oauth/consent',
+  path: '/.lovable/oauth/consent',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const Char91DotmcpChar93InvokeToolToolRoute =
+  Char91DotmcpChar93InvokeToolToolRouteImport.update({
+    id: '/.mcp/invoke-tool/$tool',
+    path: '/.mcp/invoke-tool/$tool',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/adminbackend': typeof AdminbackendRoute
   '/defects': typeof DefectsRoute
   '/execution': typeof ExecutionRoute
   '/gonogo': typeof GonogoRoute
+  '/login': typeof LoginRoute
+  '/mcp': typeof McpRoute
   '/modules': typeof ModulesRoute
   '/portfolio': typeof PortfolioRoute
   '/projecthealth': typeof ProjecthealthRoute
+  '/projects': typeof ProjectsRoute
+  '/recommendations': typeof RecommendationsRoute
   '/risks': typeof RisksRoute
   '/rtm': typeof RtmRoute
   '/tasks': typeof TasksRoute
   '/testcases': typeof TestcasesRoute
   '/testplans': typeof TestplansRoute
+  '/users': typeof UsersRoute
+  '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
+  '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/adminbackend': typeof AdminbackendRoute
   '/defects': typeof DefectsRoute
   '/execution': typeof ExecutionRoute
   '/gonogo': typeof GonogoRoute
+  '/login': typeof LoginRoute
+  '/mcp': typeof McpRoute
   '/modules': typeof ModulesRoute
   '/portfolio': typeof PortfolioRoute
   '/projecthealth': typeof ProjecthealthRoute
+  '/projects': typeof ProjectsRoute
+  '/recommendations': typeof RecommendationsRoute
   '/risks': typeof RisksRoute
   '/rtm': typeof RtmRoute
   '/tasks': typeof TasksRoute
   '/testcases': typeof TestcasesRoute
   '/testplans': typeof TestplansRoute
+  '/users': typeof UsersRoute
+  '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
+  '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/adminbackend': typeof AdminbackendRoute
   '/defects': typeof DefectsRoute
   '/execution': typeof ExecutionRoute
   '/gonogo': typeof GonogoRoute
+  '/login': typeof LoginRoute
+  '/mcp': typeof McpRoute
   '/modules': typeof ModulesRoute
   '/portfolio': typeof PortfolioRoute
   '/projecthealth': typeof ProjecthealthRoute
+  '/projects': typeof ProjectsRoute
+  '/recommendations': typeof RecommendationsRoute
   '/risks': typeof RisksRoute
   '/rtm': typeof RtmRoute
   '/tasks': typeof TasksRoute
   '/testcases': typeof TestcasesRoute
   '/testplans': typeof TestplansRoute
+  '/users': typeof UsersRoute
+  '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
+  '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/adminbackend'
     | '/defects'
     | '/execution'
     | '/gonogo'
+    | '/login'
+    | '/mcp'
     | '/modules'
     | '/portfolio'
     | '/projecthealth'
+    | '/projects'
+    | '/recommendations'
     | '/risks'
     | '/rtm'
     | '/tasks'
     | '/testcases'
     | '/testplans'
+    | '/users'
+    | '/.mcp/list-tools'
+    | '/.well-known/oauth-protected-resource'
+    | '/.lovable/oauth/consent'
+    | '/.mcp/invoke-tool/$tool'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/adminbackend'
     | '/defects'
     | '/execution'
     | '/gonogo'
+    | '/login'
+    | '/mcp'
     | '/modules'
     | '/portfolio'
     | '/projecthealth'
+    | '/projects'
+    | '/recommendations'
     | '/risks'
     | '/rtm'
     | '/tasks'
     | '/testcases'
     | '/testplans'
+    | '/users'
+    | '/.mcp/list-tools'
+    | '/.well-known/oauth-protected-resource'
+    | '/.lovable/oauth/consent'
+    | '/.mcp/invoke-tool/$tool'
   id:
     | '__root__'
     | '/'
+    | '/adminbackend'
     | '/defects'
     | '/execution'
     | '/gonogo'
+    | '/login'
+    | '/mcp'
     | '/modules'
     | '/portfolio'
     | '/projecthealth'
+    | '/projects'
+    | '/recommendations'
     | '/risks'
     | '/rtm'
     | '/tasks'
     | '/testcases'
     | '/testplans'
+    | '/users'
+    | '/.mcp/list-tools'
+    | '/.well-known/oauth-protected-resource'
+    | '/.lovable/oauth/consent'
+    | '/.mcp/invoke-tool/$tool'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminbackendRoute: typeof AdminbackendRoute
   DefectsRoute: typeof DefectsRoute
   ExecutionRoute: typeof ExecutionRoute
   GonogoRoute: typeof GonogoRoute
+  LoginRoute: typeof LoginRoute
+  McpRoute: typeof McpRoute
   ModulesRoute: typeof ModulesRoute
   PortfolioRoute: typeof PortfolioRoute
   ProjecthealthRoute: typeof ProjecthealthRoute
+  ProjectsRoute: typeof ProjectsRoute
+  RecommendationsRoute: typeof RecommendationsRoute
   RisksRoute: typeof RisksRoute
   RtmRoute: typeof RtmRoute
   TasksRoute: typeof TasksRoute
   TestcasesRoute: typeof TestcasesRoute
   TestplansRoute: typeof TestplansRoute
+  UsersRoute: typeof UsersRoute
+  Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
+  Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
+  Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -193,6 +326,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/adminbackend': {
+      id: '/adminbackend'
+      path: '/adminbackend'
+      fullPath: '/adminbackend'
+      preLoaderRoute: typeof AdminbackendRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/defects': {
@@ -216,6 +356,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GonogoRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mcp': {
+      id: '/mcp'
+      path: '/mcp'
+      fullPath: '/mcp'
+      preLoaderRoute: typeof McpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/modules': {
       id: '/modules'
       path: '/modules'
@@ -235,6 +389,20 @@ declare module '@tanstack/react-router' {
       path: '/projecthealth'
       fullPath: '/projecthealth'
       preLoaderRoute: typeof ProjecthealthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/projects': {
+      id: '/projects'
+      path: '/projects'
+      fullPath: '/projects'
+      preLoaderRoute: typeof ProjectsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/recommendations': {
+      id: '/recommendations'
+      path: '/recommendations'
+      fullPath: '/recommendations'
+      preLoaderRoute: typeof RecommendationsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/risks': {
@@ -272,22 +440,68 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TestplansRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/users': {
+      id: '/users'
+      path: '/users'
+      fullPath: '/users'
+      preLoaderRoute: typeof UsersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/.mcp/list-tools': {
+      id: '/.mcp/list-tools'
+      path: '/.mcp/list-tools'
+      fullPath: '/.mcp/list-tools'
+      preLoaderRoute: typeof Char91DotmcpChar93ListToolsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/.well-known/oauth-protected-resource': {
+      id: '/.well-known/oauth-protected-resource'
+      path: '/.well-known/oauth-protected-resource'
+      fullPath: '/.well-known/oauth-protected-resource'
+      preLoaderRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/.lovable/oauth/consent': {
+      id: '/.lovable/oauth/consent'
+      path: '/.lovable/oauth/consent'
+      fullPath: '/.lovable/oauth/consent'
+      preLoaderRoute: typeof DotlovableOauthConsentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/.mcp/invoke-tool/$tool': {
+      id: '/.mcp/invoke-tool/$tool'
+      path: '/.mcp/invoke-tool/$tool'
+      fullPath: '/.mcp/invoke-tool/$tool'
+      preLoaderRoute: typeof Char91DotmcpChar93InvokeToolToolRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminbackendRoute: AdminbackendRoute,
   DefectsRoute: DefectsRoute,
   ExecutionRoute: ExecutionRoute,
   GonogoRoute: GonogoRoute,
+  LoginRoute: LoginRoute,
+  McpRoute: McpRoute,
   ModulesRoute: ModulesRoute,
   PortfolioRoute: PortfolioRoute,
   ProjecthealthRoute: ProjecthealthRoute,
+  ProjectsRoute: ProjectsRoute,
+  RecommendationsRoute: RecommendationsRoute,
   RisksRoute: RisksRoute,
   RtmRoute: RtmRoute,
   TasksRoute: TasksRoute,
   TestcasesRoute: TestcasesRoute,
   TestplansRoute: TestplansRoute,
+  UsersRoute: UsersRoute,
+  Char91DotmcpChar93ListToolsRoute: Char91DotmcpChar93ListToolsRoute,
+  Char91DotwellKnownChar93OauthProtectedResourceRoute:
+    Char91DotwellKnownChar93OauthProtectedResourceRoute,
+  DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
+  Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

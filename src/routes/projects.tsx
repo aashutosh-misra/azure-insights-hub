@@ -97,6 +97,7 @@ function ProjectsPage() {
 
       {form && (
         <Modal
+          open
           title={state.projects.some((p) => p.id === form.id) ? "Edit project" : "New project"}
           onClose={() => setForm(null)}
           footer={
@@ -128,9 +129,9 @@ function ProjectsPage() {
             <Field label="End">
               <input type="date" className={inputCls} value={form.end} onChange={(e) => setForm({ ...form, end: e.target.value })} />
             </Field>
-            <Field label="Description" className="sm:col-span-2">
+            <div className="sm:col-span-2"><Field label="Description">
               <textarea className={inputCls} rows={3} value={form.desc} onChange={(e) => setForm({ ...form, desc: e.target.value })} />
-            </Field>
+            </Field></div>
           </div>
         </Modal>
       )}

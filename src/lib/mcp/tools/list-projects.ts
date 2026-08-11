@@ -13,7 +13,7 @@ export default defineTool({
     const data = await fetchDashboard();
     return {
       content: [{ type: "text", text: JSON.stringify(data.projects, null, 2) }],
-      structuredContent: { projects: data.projects, generatedAt: data.generatedAt },
+      structuredContent: { projects: data.projects, refreshedAt: data.refreshedAt, organization: data.organization },
     };
   },
 });

@@ -80,11 +80,11 @@
               "enum": [
                 "stale",
                 "overdue",
-                "criticalBugs",
-                "openBugs",
-                "openRisks",
-                "activeTasks",
-                "closedTasks"
+                "critical",
+                "bugs",
+                "risks",
+                "productBugs",
+                "all"
               ],
               "description": "Which metric's work items to return."
             }

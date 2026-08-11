@@ -5,11 +5,11 @@ import { fetchProjectItems, type Metric } from "@/lib/azure.server";
 const METRICS = [
   "stale",
   "overdue",
-  "criticalBugs",
-  "openBugs",
-  "openRisks",
-  "activeTasks",
-  "closedTasks",
+  "critical",
+  "bugs",
+  "risks",
+  "productBugs",
+  "all",
 ] as const satisfies readonly Metric[];
 
 export default defineTool({

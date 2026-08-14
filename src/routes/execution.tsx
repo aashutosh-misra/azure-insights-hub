@@ -4,7 +4,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import { useQa, uid } from "@/lib/qa/store";
 import { execStats, moduleById } from "@/lib/qa/compute";
 import type { ExecStatus, ActivityEntry } from "@/lib/qa/types";
-import { Badge, Card, Kpi, PageHeader, Btn, Progress, Field, inputCls, Empty } from "@/components/qa/ui";
+import { Badge, Card, Kpi, PageHeader, Btn, Progress, Field, inputCls, Empty, Table, Td } from "@/components/qa/ui";
 
 export const Route = createFileRoute("/execution")({
   head: () => ({

@@ -106,12 +106,6 @@ function ModulesPage() {
         actions={<Btn variant="primary" onClick={openAdd}>+ Add Module</Btn>}
       />
 
-      <div className="mb-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <Kpi label="Modules" value={modules.length} tone="blue" />
-        <Kpi label="In Testing" value={inTesting} tone="amber" />
-        <Kpi label="Released to UAT+" value={releasedUat} tone="green" />
-        <Kpi label="Avg Coverage" value={`${avgCoverage}%`} tone="purple" />
-      </div>
 
       <Card
         title="Filters"

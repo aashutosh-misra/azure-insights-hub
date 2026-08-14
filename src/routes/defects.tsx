@@ -24,7 +24,6 @@ import {
   Empty,
   Field,
   inputCls,
-  Kpi,
   Modal,
   PageHeader,
   Table,
@@ -192,12 +191,6 @@ function DefectsPage() {
         actions={<Btn variant="primary" onClick={openNew}>+ Log Defect</Btn>}
       />
 
-      <div className="mb-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <Kpi label="Open Defects" value={open.length} tone="blue" />
-        <Kpi label="Critical Open" value={critical} tone="red" />
-        <Kpi label="SLA Breached" value={breached} tone="amber" />
-        <Kpi label="Closed" value={closed} tone="green" />
-      </div>
 
       <div className="mb-3 grid grid-cols-1 gap-3 lg:grid-cols-2">
         <Card title="Open Bugs by Module">

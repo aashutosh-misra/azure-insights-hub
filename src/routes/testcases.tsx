@@ -7,7 +7,6 @@ import { EXEC_STATUSES, SEVERITIES } from "@/lib/qa/seed";
 import {
   Badge,
   Card,
-  Kpi,
   PageHeader,
   Btn,
   Table,
@@ -212,13 +211,6 @@ function TestCasesPage() {
         }
       />
 
-      <div className="mb-3 grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-5">
-        <Kpi label="Total" value={kpis.total} tone="blue" />
-        <Kpi label="Executed" value={kpis.executed} tone="teal" />
-        <Kpi label="Pass" value={kpis.pass} tone="green" />
-        <Kpi label="Fail" value={kpis.fail} tone="red" />
-        <Kpi label="Not Executed" value={kpis.notExec} tone="muted" />
-      </div>
 
       <Card className="mb-3">
         <div className="flex flex-wrap gap-2">

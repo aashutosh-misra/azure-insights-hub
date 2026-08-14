@@ -5,7 +5,7 @@ import { useQa, uid } from "@/lib/qa/store";
 import { SEVERITIES } from "@/lib/qa/seed";
 import { PALETTE, scopedModules } from "@/lib/qa/compute";
 import type { Requirement, Severity } from "@/lib/qa/types";
-import { Badge, Btn, Card, Empty, Field, inputCls, Kpi, Modal, PageHeader, Table, Td } from "@/components/qa/ui";
+import { Badge, Btn, Card, Empty, Field, inputCls, Modal, PageHeader, Table, Td } from "@/components/qa/ui";
 
 export const Route = createFileRoute("/rtm")({
   head: () => ({
@@ -130,12 +130,6 @@ function RtmPage() {
         actions={<Btn variant="primary" onClick={openAdd}>+ Add Requirement</Btn>}
       />
 
-      <div className="mb-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <Kpi label="Total Requirements" value={rows.length} tone="blue" />
-        <Kpi label="Covered" value={covered} tone="green" />
-        <Kpi label="Uncovered" value={uncovered} tone="red" />
-        <Kpi label="Coverage %" value={`${coveragePct}%`} tone="purple" />
-      </div>
 
       <Card title="Coverage by Module" className="mb-3">
         <div style={{ height: 240 }}>

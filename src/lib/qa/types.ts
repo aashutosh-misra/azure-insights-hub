@@ -94,9 +94,25 @@ export interface User {
   theme: string;
 }
 
+export type Core = "Symitar" | "DNA" | "Keystone" | "Portico" | "Other";
+
+export interface LibraryCase {
+  id: string;
+  core: Core;
+  area: string;
+  title: string;
+  type: string;
+  priority: Severity;
+  desc: string;
+  steps: string;
+  expected: string;
+  tags: string;
+}
+
 export interface Project {
   id: string;
   name: string;
+  core: Core;
   desc: string;
   owner: string;
   status: string;
@@ -174,6 +190,7 @@ export interface QaState {
   defects: Defect[];
   requirements: Requirement[];
   templates: Template[];
+  libraryCases: LibraryCase[];
   history: HistorySnapshot[];
   settings: AdminSettings;
   activity: ActivityLog[];

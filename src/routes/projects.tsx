@@ -3,7 +3,8 @@ import { useState } from "react";
 import { Badge, Btn, Card, Empty, Field, inputCls, Modal, PageHeader, Table, Td } from "@/components/qa/ui";
 import { fmtDate } from "@/lib/qa/compute";
 import { useQa, uid } from "@/lib/qa/store";
-import type { Project } from "@/lib/qa/types";
+import type { Core, Project } from "@/lib/qa/types";
+import { CORES } from "@/lib/qa/seed";
 
 export const Route = createFileRoute("/projects")({
   head: () => ({
@@ -22,6 +23,7 @@ export const Route = createFileRoute("/projects")({
 const empty = (): Project => ({
   id: uid("p"),
   name: "",
+  core: "Symitar",
   desc: "",
   owner: "",
   status: "Active",
@@ -59,13 +61,14 @@ function ProjectsPage() {
         actions={<Btn onClick={() => setForm(empty())}>+ New project</Btn>}
       />
       <Card title={`${state.projects.length} projects`}>
-        <Table head={["Project", "Owner", "Status", "Start", "End", "Modules", ""]}>
+        <Table head={["Project", "Core", "Owner", "Status", "Start", "End", "Modules", ""]}>
           {state.projects.map((p) => (
             <tr key={p.id} className="border-b border-border last:border-0">
               <Td>
                 <span className="font-semibold">{p.name}</span>
                 <span className="block text-[11px] text-muted-foreground">{p.desc}</span>
               </Td>
+              <Td><Badge tone="purple">{p.core}</Badge></Td>
               <Td>{p.owner || "—"}</Td>
               <Td>
                 <Badge tone={p.status === "Active" ? "green" : "muted"}>{p.status}</Badge>
@@ -87,7 +90,7 @@ function ProjectsPage() {
           ))}
           {!state.projects.length && (
             <tr>
-              <td colSpan={7}>
+              <td colSpan={8}>
                 <Empty text="No projects yet." />
               </td>
             </tr>
@@ -112,6 +115,13 @@ function ProjectsPage() {
           <div className="grid gap-3 sm:grid-cols-2">
             <Field label="Name">
               <input className={inputCls} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+            </Field>
+            <Field label="Core / Project type">
+              <select className={inputCls} value={form.core} onChange={(e) => setForm({ ...form, core: e.target.value as Core })}>
+                {CORES.map((c) => (
+                  <option key={c}>{c}</option>
+                ))}
+              </select>
             </Field>
             <Field label="Owner">
               <input className={inputCls} value={form.owner} onChange={(e) => setForm({ ...form, owner: e.target.value })} />

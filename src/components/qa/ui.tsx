@@ -47,7 +47,9 @@ export function Card({
   className?: string;
 }) {
   return (
-    <div className={`rounded-md border border-border bg-card shadow-xs ${className}`}>
+    <div
+      className={`surface-3d lift-3d rounded-xl border border-border bg-card ${className}`}
+    >
       {(title || actions) && (
         <div className="flex items-center justify-between gap-3 border-b border-border px-3.5 py-2.5">
           <h2 className="text-xs font-bold uppercase tracking-wide text-muted-foreground">{title}</h2>
@@ -85,9 +87,7 @@ export function Kpi({
   return (
     <Comp
       onClick={onClick}
-      className={`block w-full border border-l-4 border-border bg-card px-4 py-3 text-left ${bar[tone]} rounded-md ${
-        onClick ? "transition hover:shadow-sm" : ""
-      }`}
+      className={`surface-3d lift-3d block w-full rounded-xl border border-l-4 border-border bg-card px-4 py-3 text-left ${bar[tone]}`}
     >
       <p className="text-[10.5px] font-semibold uppercase tracking-wider text-muted-foreground">{label}</p>
       <p className="mt-1 text-2xl font-bold leading-none text-foreground">{value}</p>
@@ -110,8 +110,12 @@ export function PageHeader({
   return (
     <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
       <div>
-        <h1 className="flex items-center gap-2 text-base font-bold text-foreground">
-          {icon}
+        <h1 className="flex items-center gap-2 text-lg font-black tracking-tight text-foreground">
+          {icon && (
+            <span className="surface-3d inline-flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+              {icon}
+            </span>
+          )}
           {title}
         </h1>
         {subtitle && <p className="mt-0.5 text-[11.5px] text-muted-foreground">{subtitle}</p>}
@@ -139,17 +143,17 @@ export function Btn({
   className?: string;
 }) {
   const v = {
-    primary: "bg-primary text-primary-foreground hover:brightness-110",
-    secondary: "border border-border bg-card text-foreground hover:bg-accent",
-    danger: "bg-rag-red text-white hover:brightness-110",
-    ghost: "text-muted-foreground hover:bg-accent",
+    primary: "press-3d bg-primary text-primary-foreground",
+    secondary: "press-3d border border-border bg-card text-foreground",
+    danger: "press-3d bg-rag-red text-white",
+    ghost: "text-muted-foreground transition hover:bg-accent active:scale-95",
   }[variant];
   return (
     <button
       type={type}
       onClick={onClick}
       disabled={disabled}
-      className={`inline-flex items-center gap-1.5 rounded font-semibold transition disabled:opacity-50 ${
+      className={`inline-flex items-center gap-1.5 rounded-lg font-semibold disabled:opacity-50 ${
         size === "sm" ? "px-2.5 py-1.5 text-[11.5px]" : "px-3.5 py-2 text-sm"
       } ${v} ${className}`}
     >
@@ -215,7 +219,7 @@ export function Modal({
       onClick={onClose}
     >
       <div
-        className={`w-full rounded-md border border-border bg-card shadow-lg ${wide ? "max-w-4xl" : "max-w-xl"}`}
+        className={`animate-in zoom-in-95 fade-in w-full rounded-xl border border-border bg-card shadow-2xl ${wide ? "max-w-4xl" : "max-w-xl"}`}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between border-b border-border px-4 py-3">
@@ -243,7 +247,7 @@ export function Field({ label, children }: { label: string; children: ReactNode 
 }
 
 export const inputCls =
-  "w-full rounded border border-input bg-background px-2.5 py-1.5 text-[12.5px] text-foreground outline-none focus:border-ring";
+  "w-full rounded-lg border border-input bg-background px-2.5 py-1.5 text-[12.5px] text-foreground outline-none focus:border-ring";
 
 export function Progress({ pct, tone = "green" }: { pct: number; tone?: Tone }) {
   const bg: Record<Tone, string> = {

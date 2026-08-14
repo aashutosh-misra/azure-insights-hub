@@ -10,7 +10,7 @@ import {
 import { makeSeed } from "./seed";
 import type { QaState } from "./types";
 
-const STORAGE_KEY = "qa-app-state-v1";
+const STORAGE_KEY = "qa-app-state-v2";
 
 interface QaContextValue {
   state: QaState;

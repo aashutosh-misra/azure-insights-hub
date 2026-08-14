@@ -21,6 +21,7 @@ import { Route as PortfolioRouteImport } from './routes/portfolio'
 import { Route as ProjecthealthRouteImport } from './routes/projecthealth'
 import { Route as ProjectsRouteImport } from './routes/projects'
 import { Route as RecommendationsRouteImport } from './routes/recommendations'
+import { Route as RepositoryRouteImport } from './routes/repository'
 import { Route as RisksRouteImport } from './routes/risks'
 import { Route as RtmRouteImport } from './routes/rtm'
 import { Route as TasksRouteImport } from './routes/tasks'
@@ -92,6 +93,11 @@ const RecommendationsRoute = RecommendationsRouteImport.update({
   path: '/recommendations',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RepositoryRoute = RepositoryRouteImport.update({
+  id: '/repository',
+  path: '/repository',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RisksRoute = RisksRouteImport.update({
   id: '/risks',
   path: '/risks',
@@ -159,6 +165,7 @@ export interface FileRoutesByFullPath {
   '/projecthealth': typeof ProjecthealthRoute
   '/projects': typeof ProjectsRoute
   '/recommendations': typeof RecommendationsRoute
+  '/repository': typeof RepositoryRoute
   '/risks': typeof RisksRoute
   '/rtm': typeof RtmRoute
   '/tasks': typeof TasksRoute
@@ -183,6 +190,7 @@ export interface FileRoutesByTo {
   '/projecthealth': typeof ProjecthealthRoute
   '/projects': typeof ProjectsRoute
   '/recommendations': typeof RecommendationsRoute
+  '/repository': typeof RepositoryRoute
   '/risks': typeof RisksRoute
   '/rtm': typeof RtmRoute
   '/tasks': typeof TasksRoute
@@ -208,6 +216,7 @@ export interface FileRoutesById {
   '/projecthealth': typeof ProjecthealthRoute
   '/projects': typeof ProjectsRoute
   '/recommendations': typeof RecommendationsRoute
+  '/repository': typeof RepositoryRoute
   '/risks': typeof RisksRoute
   '/rtm': typeof RtmRoute
   '/tasks': typeof TasksRoute
@@ -234,6 +243,7 @@ export interface FileRouteTypes {
     | '/projecthealth'
     | '/projects'
     | '/recommendations'
+    | '/repository'
     | '/risks'
     | '/rtm'
     | '/tasks'
@@ -258,6 +268,7 @@ export interface FileRouteTypes {
     | '/projecthealth'
     | '/projects'
     | '/recommendations'
+    | '/repository'
     | '/risks'
     | '/rtm'
     | '/tasks'
@@ -282,6 +293,7 @@ export interface FileRouteTypes {
     | '/projecthealth'
     | '/projects'
     | '/recommendations'
+    | '/repository'
     | '/risks'
     | '/rtm'
     | '/tasks'
@@ -307,6 +319,7 @@ export interface RootRouteChildren {
   ProjecthealthRoute: typeof ProjecthealthRoute
   ProjectsRoute: typeof ProjectsRoute
   RecommendationsRoute: typeof RecommendationsRoute
+  RepositoryRoute: typeof RepositoryRoute
   RisksRoute: typeof RisksRoute
   RtmRoute: typeof RtmRoute
   TasksRoute: typeof TasksRoute
@@ -405,6 +418,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RecommendationsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/repository': {
+      id: '/repository'
+      path: '/repository'
+      fullPath: '/repository'
+      preLoaderRoute: typeof RepositoryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/risks': {
       id: '/risks'
       path: '/risks'
@@ -491,6 +511,7 @@ const rootRouteChildren: RootRouteChildren = {
   ProjecthealthRoute: ProjecthealthRoute,
   ProjectsRoute: ProjectsRoute,
   RecommendationsRoute: RecommendationsRoute,
+  RepositoryRoute: RepositoryRoute,
   RisksRoute: RisksRoute,
   RtmRoute: RtmRoute,
   TasksRoute: TasksRoute,

@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import {
   Area,
   AreaChart,
@@ -14,7 +14,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { Badge, Card, Empty, Kpi, PageHeader, Progress, Table, Td } from "@/components/qa/ui";
+import { Badge, Card, Empty, inputCls, Kpi, PageHeader, Progress, Table, Td } from "@/components/qa/ui";
 import {
   daysSince,
   execStats,
@@ -58,9 +58,22 @@ function DashboardPage() {
   const { state } = useQa();
   const project = state.currentProject;
 
-  const modules = useMemo(() => scopedModules(state), [state]);
-  const cases = useMemo(() => scopedTestCases(state), [state]);
-  const defects = useMemo(() => scopedDefects(state), [state]);
+  const [moduleFilter, setModuleFilter] = useState("All");
+
+  const allModules = useMemo(() => scopedModules(state), [state]);
+  const modules = useMemo(
+    () => (moduleFilter === "All" ? allModules : allModules.filter((m) => m.id === moduleFilter)),
+    [allModules, moduleFilter],
+  );
+  const moduleIds = useMemo(() => new Set(modules.map((m) => m.id)), [modules]);
+  const cases = useMemo(
+    () => scopedTestCases(state).filter((c) => moduleFilter === "All" || moduleIds.has(c.moduleId)),
+    [state, moduleFilter, moduleIds],
+  );
+  const defects = useMemo(
+    () => scopedDefects(state).filter((d) => moduleFilter === "All" || moduleIds.has(d.moduleId)),
+    [state, moduleFilter, moduleIds],
+  );
   const st = useMemo(() => execStats(cases), [cases]);
   const gate = useMemo(() => goNoGo(state, project), [state, project]);
   const recs = useMemo(() => recommendations(state), [state]);
@@ -115,6 +128,21 @@ function DashboardPage() {
       <PageHeader
         title="QA Delivery Dashboard"
         subtitle={`${project === "All" ? "All projects" : project} · ${modules.length} modules · ${cases.length} test cases`}
+        actions={
+          <select
+            className={`${inputCls} max-w-[240px]`}
+            value={moduleFilter}
+            onChange={(e) => setModuleFilter(e.target.value)}
+            aria-label="Module filter"
+          >
+            <option value="All">All modules</option>
+            {allModules.map((m) => (
+              <option key={m.id} value={m.id}>
+                {m.proj} › {m.name}
+              </option>
+            ))}
+          </select>
+        }
       />
 
       <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">

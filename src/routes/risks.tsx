@@ -5,7 +5,7 @@ import { useQa } from "@/lib/qa/store";
 import { DEFECT_SLA_DAYS, SEVERITIES } from "@/lib/qa/seed";
 import { daysSince, execStats, fmtDate, moduleById, scopedDefects, scopedModules, scopedTestCases, slaAgeing } from "@/lib/qa/compute";
 import type { Severity } from "@/lib/qa/types";
-import { Badge, Card, Empty, Kpi, PageHeader, Table, Td } from "@/components/qa/ui";
+import { Badge, Card, Empty, PageHeader, Table, Td } from "@/components/qa/ui";
 
 export const Route = createFileRoute("/risks")({
   head: () => ({
@@ -87,12 +87,6 @@ function RisksPage() {
     <div>
       <PageHeader title="Risk & SLA Overview" subtitle="SLA compliance, ageing exposure and module-level risk scoring" />
 
-      <div className="mb-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <Kpi label="Overall SLA Compliance" value={`${overallCompliance}%`} tone={overallCompliance >= 90 ? "green" : overallCompliance >= 70 ? "amber" : "red"} />
-        <Kpi label="Open Defects" value={openDefects.length} tone="blue" />
-        <Kpi label="SLA Breaches" value={totalBreached} tone="red" />
-        <Kpi label="At-Risk Items" value={atRisk.length} tone="amber" />
-      </div>
 
       <div className="mb-3 grid grid-cols-1 gap-3 lg:grid-cols-2">
         <Card title="SLA Compliance by Severity">

@@ -4,7 +4,7 @@ import { useQa, uid } from "@/lib/qa/store";
 import { daysSince, moduleById, fmtDate } from "@/lib/qa/compute";
 import type { Task } from "@/lib/qa/types";
 import { SEVERITIES } from "@/lib/qa/seed";
-import { Badge, Card, Kpi, PageHeader, Btn, Table, Td, Empty, Modal, Field, inputCls } from "@/components/qa/ui";
+import { Badge, Card, PageHeader, Btn, Table, Td, Empty, Modal, Field, inputCls } from "@/components/qa/ui";
 
 export const Route = createFileRoute("/tasks")({
   head: () => ({
@@ -98,12 +98,6 @@ function TasksPage() {
         actions={<Btn variant="primary" onClick={() => setEditing(emptyTask())}>+ New Task</Btn>}
       />
 
-      <div className="mb-3 grid grid-cols-2 gap-2.5 sm:grid-cols-4">
-        <Kpi label="Open" value={kpis.open} tone="blue" />
-        <Kpi label="In Progress" value={kpis.inProgress} tone="teal" />
-        <Kpi label="Overdue" value={kpis.overdue} tone="red" />
-        <Kpi label="Completed" value={kpis.completed} tone="green" />
-      </div>
 
       <Card className="mb-3">
         <div className="flex flex-wrap gap-2">

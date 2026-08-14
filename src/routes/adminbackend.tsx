@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Btn, Card, Empty, Field, inputCls, Kpi, PageHeader, Table, Td } from "@/components/qa/ui";
+import { Btn, Card, Empty, Field, inputCls, PageHeader, Table, Td } from "@/components/qa/ui";
 import { fmtDate } from "@/lib/qa/compute";
 import { useQa } from "@/lib/qa/store";
 
@@ -39,12 +39,6 @@ function AdminPage() {
     <div className="space-y-4">
       <PageHeader title="Admin Backend" subtitle="Platform configuration and audit trail" />
 
-      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <Kpi label="Projects" value={state.projects.length} tone="blue" />
-        <Kpi label="Users" value={state.users.length} tone="teal" />
-        <Kpi label="Test cases" value={state.testCases.length} tone="purple" />
-        <Kpi label="Defects" value={state.defects.length} tone="amber" />
-      </section>
 
       <div className="grid gap-3 lg:grid-cols-2">
         <Card title="Platform settings">

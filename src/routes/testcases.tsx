@@ -1,13 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import { useQa, uid } from "@/lib/qa/store";
-import { scopedTestCases, moduleById, fmtDate } from "@/lib/qa/compute";
+import { scopedTestCases, scopedModules, moduleById, fmtDate } from "@/lib/qa/compute";
+import { ImportDialog } from "@/components/qa/ImportDialog";
+import type { ImportField } from "@/lib/qa/import";
 import type { TestCase, ActivityEntry } from "@/lib/qa/types";
 import { EXEC_STATUSES, SEVERITIES } from "@/lib/qa/seed";
 import {
   Badge,
   Card,
-  Kpi,
   PageHeader,
   Btn,
   Table,
@@ -72,7 +73,29 @@ function TestCasesPage() {
   const [editing, setEditing] = useState<TestCase | null>(null);
   const [viewing, setViewing] = useState<TestCase | null>(null);
   const [isNew, setIsNew] = useState(false);
-  const fileRef = useRef<HTMLInputElement>(null);
+  const [importOpen, setImportOpen] = useState(false);
+  const projectModules = useMemo(() => scopedModules(state), [state]);
+  const [importModuleId, setImportModuleId] = useState("");
+
+  function importRecords(records: Record<ImportField, string>[]) {
+    const imported: TestCase[] = records.map((r) => ({
+      ...emptyTc(),
+      id: uid("tc"),
+      moduleId: importModuleId,
+      title: r.title ?? "",
+      desc: r.desc ?? "",
+      steps: r.steps ?? "",
+      expected: r.expected ?? "",
+      type: r.type || "Functional",
+      priority: (SEVERITIES as readonly string[]).includes(r.priority) ? (r.priority as TestCase["priority"]) : "Medium",
+      assignee: r.assignee ?? "",
+      status: (EXEC_STATUSES as readonly string[]).includes(r.status) ? (r.status as TestCase["status"]) : "Not Executed",
+      automation: r.automation?.toLowerCase().startsWith("auto") ? "Automated" : "Manual",
+      tags: r.tags ?? "",
+    }));
+    update((s) => ({ ...s, testCases: [...imported, ...s.testCases] }));
+    log(`Imported ${imported.length} test case(s) into module ${moduleById(state, importModuleId)?.name ?? ""}`);
+  }
 
   const assignees = useMemo(() => Array.from(new Set(cases.map((c) => c.assignee).filter(Boolean))), [cases]);
 
@@ -149,35 +172,6 @@ function TestCasesPage() {
     log("Exported test cases to CSV");
   }
 
-  function importCsv(file: File) {
-    const reader = new FileReader();
-    reader.onload = () => {
-      const text = String(reader.result || "");
-      const lines = text.split(/\r?\n/).filter(Boolean);
-      if (lines.length < 2) return;
-      const header = (lines[0] ?? "").split(",").map((h) => h.replace(/"/g, "").trim());
-      const rows = lines.slice(1).map((line) => {
-        const vals = line.split(",").map((v) => v.replace(/^"|"$/g, ""));
-        const rec: Record<string, string> = {};
-        header.forEach((h, i) => (rec[h] = vals[i] ?? ""));
-        return rec;
-      });
-      const imported: TestCase[] = rows.map((r) => ({
-        ...emptyTc(),
-        ...r,
-        id: r["id"] || uid("tc"),
-        priority: (r["priority"] as any) || "Medium",
-        status: (r["status"] as any) || "Not Executed",
-        automation: (r["automation"] as any) || "Manual",
-        reqIds: [],
-        activity: [],
-      }));
-      update((s) => ({ ...s, testCases: [...imported, ...s.testCases] }));
-      log(`Imported ${imported.length} test case(s) from CSV`);
-    };
-    reader.readAsText(file);
-  }
-
   function addActivity(tc: TestCase, text: string): TestCase {
     const entry: ActivityEntry = { ts: new Date().toISOString(), user: currentUser.name, text };
     return { ...tc, activity: [entry, ...tc.activity] };
@@ -190,14 +184,7 @@ function TestCasesPage() {
         subtitle="Register of all authored test cases scoped to the active project."
         actions={
           <>
-            <Btn onClick={() => fileRef.current?.click()}>Import CSV</Btn>
-            <input
-              ref={fileRef}
-              type="file"
-              accept=".csv"
-              className="hidden"
-              onChange={(e) => e.target.files?.[0] && importCsv(e.target.files[0])}
-            />
+            <Btn onClick={() => setImportOpen(true)}>Import Excel / CSV</Btn>
             <Btn onClick={exportCsv}>Export CSV</Btn>
             <Btn
               variant="primary"
@@ -212,13 +199,27 @@ function TestCasesPage() {
         }
       />
 
-      <div className="mb-3 grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-5">
-        <Kpi label="Total" value={kpis.total} tone="blue" />
-        <Kpi label="Executed" value={kpis.executed} tone="teal" />
-        <Kpi label="Pass" value={kpis.pass} tone="green" />
-        <Kpi label="Fail" value={kpis.fail} tone="red" />
-        <Kpi label="Not Executed" value={kpis.notExec} tone="muted" />
-      </div>
+      <ImportDialog
+        open={importOpen}
+        onClose={() => setImportOpen(false)}
+        onImport={importRecords}
+        canImport={Boolean(importModuleId)}
+        target={
+          <div>
+            <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+              Step 1 — target module ({state.currentProject === "All" ? "all projects" : state.currentProject})
+            </p>
+            <select className={inputCls} value={importModuleId} onChange={(e) => setImportModuleId(e.target.value)}>
+              <option value="">Select a module…</option>
+              {projectModules.map((m) => (
+                <option key={m.id} value={m.id}>
+                  {m.proj} › {m.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        }
+      />
 
       <Card className="mb-3">
         <div className="flex flex-wrap gap-2">
@@ -230,9 +231,9 @@ function TestCasesPage() {
           />
           <select className={`${inputCls} max-w-[160px]`} value={fModule} onChange={(e) => setFModule(e.target.value)}>
             <option value="All">All Modules</option>
-            {state.modules.map((m) => (
+            {scopedModules(state).map((m) => (
               <option key={m.id} value={m.id}>
-                {m.name}
+                {m.name} · {m.proj}
               </option>
             ))}
           </select>
@@ -465,9 +466,9 @@ function TestCaseModal({
             onChange={(e) => setForm({ ...form, moduleId: e.target.value })}
           >
             <option value="">Select module…</option>
-            {state.modules.map((m) => (
+            {scopedModules(state).map((m) => (
               <option key={m.id} value={m.id}>
-                {m.name}
+                {m.name} · {m.proj}
               </option>
             ))}
           </select>

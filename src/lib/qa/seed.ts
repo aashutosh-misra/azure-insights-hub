@@ -28,6 +28,8 @@ export const ROLES = [
   "QA Engineer",
 ] as const;
 
+export const CORES = ["Symitar", "DNA", "Keystone", "Portico", "Other"] as const;
+
 export const SEVERITIES = ["Critical", "High", "Medium", "Low"] as const;
 
 export const DEFECT_SLA_DAYS: Record<string, number> = {
@@ -91,10 +93,10 @@ export function makeSeed(): QaState {
       { id: "u9", name: "Sneha", email: "sneha@company.com", role: "Dev Engineer", status: "Active", assignedProjects: ["CRM Phase 1"], theme: "emerald" },
     ],
     projects: [
-      { id: "p1", name: "CRM Phase 1", desc: "Customer relationship management platform \u2014 phase 1 rollout", owner: "Akshitij", status: "Active", start: "2026-03-01", end: "2026-06-30" },
-      { id: "p2", name: "CRM Phase 2", desc: "CRM phase 2 \u2014 leads, sales & offers modules", owner: "Akrati", status: "Active", start: "2026-05-01", end: "2026-08-31" },
-      { id: "p3", name: "Integrations", desc: "Third-party and CTI integrations", owner: "Akshitij", status: "Active", start: "2026-04-01", end: "2026-06-15" },
-      { id: "p4", name: "Analytics", desc: "ML analytics & reporting dashboards", owner: "Radhika", status: "Active", start: "2026-04-15", end: "2026-07-15" },
+      { id: "p1", name: "CRM Phase 1", core: "Symitar", desc: "Customer relationship management platform \u2014 phase 1 rollout", owner: "Akshitij", status: "Active", start: "2026-03-01", end: "2026-06-30" },
+      { id: "p2", name: "CRM Phase 2", core: "DNA", desc: "CRM phase 2 \u2014 leads, sales & offers modules", owner: "Akrati", status: "Active", start: "2026-05-01", end: "2026-08-31" },
+      { id: "p3", name: "Integrations", core: "Keystone", desc: "Third-party and CTI integrations", owner: "Akshitij", status: "Active", start: "2026-04-01", end: "2026-06-15" },
+      { id: "p4", name: "Analytics", core: "Portico", desc: "ML analytics & reporting dashboards", owner: "Radhika", status: "Active", start: "2026-04-15", end: "2026-07-15" },
     ],
     defects: [
       { id: "d1", defectId: "BUG-001", title: "Member 360 date range filter not working", severity: "High", priority: "High", status: "Open", moduleId: "m1", testCaseId: "tc3", assignee: "Akrati", reporter: "Akrati", createdAt: "2026-05-02", comments: [] },
@@ -116,6 +118,16 @@ export function makeSeed(): QaState {
       { id: "t4", name: "API Integration", type: "Integration", priority: "High", desc: "Verify API request/response handling.", steps: "1. Trigger the integration action\n2. Inspect request payload\n3. Verify response handling", expected: "Correct data is sent/received and reflected in UI." },
       { id: "t5", name: "Negative / Validation", type: "Functional", priority: "Medium", desc: "Verify system rejects invalid input with a clear error.", steps: "1. Enter invalid data\n2. Submit\n3. Observe validation message", expected: "Appropriate validation error is shown; no invalid data is saved." },
       { id: "t6", name: "Performance / Load", type: "Performance", priority: "Low", desc: "Verify acceptable response time under expected load.", steps: "1. Simulate expected concurrent load\n2. Measure response times\n3. Compare against SLA", expected: "Response times remain within agreed SLA thresholds." },
+    ],
+    libraryCases: [
+      { id: "lc1", core: "Symitar", area: "Member Services", title: "Verify member inquiry by account number", type: "Functional", priority: "High", desc: "Core member inquiry lookup.", steps: "1. Open member inquiry\n2. Enter account number\n3. Submit", expected: "Member record is returned with correct demographics.", tags: "core,inquiry" },
+      { id: "lc2", core: "Symitar", area: "Teller", title: "Validate deposit posting to share account", type: "Functional", priority: "Critical", desc: "Teller deposit posting.", steps: "1. Open teller screen\n2. Post deposit\n3. Confirm", expected: "Balance increases by deposit amount and receipt prints.", tags: "teller,posting" },
+      { id: "lc3", core: "Symitar", area: "Loans", title: "Loan payment allocation to principal and interest", type: "Functional", priority: "High", desc: "Payment split validation.", steps: "1. Post loan payment\n2. Review allocation", expected: "Principal/interest split matches amortisation schedule.", tags: "loans" },
+      { id: "lc4", core: "DNA", area: "Deposits", title: "Open new savings account with minimum balance", type: "Functional", priority: "High", desc: "Account origination.", steps: "1. Start new account wizard\n2. Complete KYC\n3. Fund account", expected: "Account is opened and visible in person overview.", tags: "deposits" },
+      { id: "lc5", core: "DNA", area: "Payments", title: "ACH batch processing end of day", type: "Integration", priority: "Critical", desc: "ACH EOD batch.", steps: "1. Queue ACH batch\n2. Run EOD\n3. Verify postings", expected: "All ACH entries post and settle without exceptions.", tags: "ach,eod" },
+      { id: "lc6", core: "DNA", area: "Cards", title: "Debit card authorisation hold release", type: "Functional", priority: "Medium", desc: "Auth hold lifecycle.", steps: "1. Create authorisation\n2. Settle transaction", expected: "Hold releases and available balance updates.", tags: "cards" },
+      { id: "lc7", core: "Keystone", area: "Online Banking", title: "Member self-service password reset", type: "Functional", priority: "High", desc: "Self-service reset.", steps: "1. Click forgot password\n2. Verify OTP\n3. Set new password", expected: "Password is reset and member can sign in.", tags: "digital" },
+      { id: "lc8", core: "Portico", area: "Reporting", title: "Month-end GL reconciliation report", type: "Functional", priority: "High", desc: "GL reconciliation.", steps: "1. Run month-end report\n2. Compare to GL", expected: "Report totals reconcile to the general ledger.", tags: "gl,reporting" },
     ],
     history: [],
     settings: {

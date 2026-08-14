@@ -4,7 +4,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import { useQa, uid } from "@/lib/qa/store";
 import { execStats, moduleById } from "@/lib/qa/compute";
 import type { ExecStatus, ActivityEntry } from "@/lib/qa/types";
-import { Badge, Card, Kpi, PageHeader, Btn, Progress, Field, inputCls, Empty } from "@/components/qa/ui";
+import { Badge, Card, Kpi, PageHeader, Btn, Progress, Field, inputCls, Empty, Table, Td } from "@/components/qa/ui";
 
 export const Route = createFileRoute("/execution")({
   head: () => ({
@@ -154,6 +154,43 @@ function ExecutionPage() {
           )}
         </div>
       </Card>
+
+      <Card className="mb-3" title={`Module-wise execution — ${state.currentProject === "All" ? "all projects" : state.currentProject}`}>
+        {modules.length === 0 ? (
+          <Empty text="No modules in the active project." />
+        ) : (
+          <Table head={["Module", "Project", "Cases", "Executed", "Pass", "Fail", "Blocked", "Progress"]} minWidth={760}>
+            {modules.map((m) => {
+              const cs = state.testCases.filter((c) => c.moduleId === m.id);
+              const st = execStats(cs);
+              const blocked = cs.filter((c) => c.status === "Hold").length;
+              return (
+                <tr key={m.id} className="border-b border-border last:border-0 hover:bg-accent/40">
+                  <Td>
+                    <button className="font-semibold hover:underline" onClick={() => { setSource("module"); setModuleId(m.id); setIdx(0); }}>
+                      {m.name}
+                    </button>
+                  </Td>
+                  <Td><Badge tone="muted">{m.proj}</Badge></Td>
+                  <Td>{cs.length}</Td>
+                  <Td>{st.executed}</Td>
+                  <Td className="font-semibold text-rag-green">{st.passed}</Td>
+                  <Td className="font-semibold text-rag-red">{st.failed}</Td>
+                  <Td>{blocked}</Td>
+                  <Td>
+                    <div className="flex items-center gap-2">
+                      <div className="w-24"><Progress pct={st.execPct} tone={st.execPct >= 80 ? "green" : st.execPct >= 40 ? "amber" : "red"} /></div>
+                      <span className="text-[11px]">{st.execPct}%</span>
+                    </div>
+                  </Td>
+                </tr>
+              );
+            })}
+          </Table>
+        )}
+      </Card>
+
+
 
       {queue.length === 0 ? (
         <Card><Empty text="No test cases in this queue." /></Card>

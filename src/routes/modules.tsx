@@ -106,12 +106,6 @@ function ModulesPage() {
         actions={<Btn variant="primary" onClick={openAdd}>+ Add Module</Btn>}
       />
 
-      <div className="mb-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <Kpi label="Modules" value={modules.length} tone="blue" />
-        <Kpi label="In Testing" value={inTesting} tone="amber" />
-        <Kpi label="Released to UAT+" value={releasedUat} tone="green" />
-        <Kpi label="Avg Coverage" value={`${avgCoverage}%`} tone="purple" />
-      </div>
 
       <Card
         title="Filters"
@@ -188,13 +182,13 @@ function ModulesPage() {
           <Field label="Module Name">
             <input className={inputCls} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
           </Field>
-          <Field label="Project">
-            <input className={inputCls} value={form.proj} onChange={(e) => setForm({ ...form, proj: e.target.value })} list="proj-list" />
-            <datalist id="proj-list">
+          <Field label="Project (required)">
+            <select className={inputCls} value={form.proj} onChange={(e) => setForm({ ...form, proj: e.target.value })}>
+              <option value="">Select project…</option>
               {projectNames.map((p) => (
-                <option key={p} value={p} />
+                <option key={p} value={p}>{p}</option>
               ))}
-            </datalist>
+            </select>
           </Field>
           <Field label="ESG Owner">
             <input className={inputCls} value={form.esg} onChange={(e) => setForm({ ...form, esg: e.target.value })} />

@@ -3,7 +3,7 @@ import { useMemo, useState } from "react";
 import { Bar, BarChart, CartesianGrid, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { useQa } from "@/lib/qa/store";
 import { daysSince, goNoGo, moduleById, scopedDefects, slaAgeing } from "@/lib/qa/compute";
-import { Badge, Btn, Card, Empty, Field, inputCls, Kpi, Modal, PageHeader, Table, Td } from "@/components/qa/ui";
+import { Badge, Btn, Card, Empty, Field, inputCls, Modal, PageHeader, Table, Td } from "@/components/qa/ui";
 
 export const Route = createFileRoute("/gonogo")({
   head: () => ({
@@ -74,12 +74,6 @@ function GoNoGoPage() {
         <p className="mt-1 text-[12.5px] text-muted-foreground">Overall readiness score: <span className="font-bold text-foreground">{result.score}/100</span></p>
       </div>
 
-      <div className="mb-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <Kpi label="Score" value={`${result.score}/100`} tone={tone} />
-        <Kpi label="Open Critical Defects" value={openCritical.length} tone="red" />
-        <Kpi label="SLA Breaches" value={slaBreaches.length} tone="amber" />
-        <Kpi label="Criteria Passing" value={`${result.criteria.filter((c) => c.pass).length}/${result.criteria.length}`} tone="blue" />
-      </div>
 
       <div className="mb-3 grid grid-cols-1 gap-3 lg:grid-cols-2">
         <Card title="Gate Criteria">

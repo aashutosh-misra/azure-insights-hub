@@ -77,7 +77,7 @@ export function AiGenerateDialog({
           <Btn onClick={close}>Cancel</Btn>
           <Btn
             variant="primary"
-            disabled={picked.size === 0 || disabled}
+            disabled={picked.size === 0 || Boolean(disabled)}
             onClick={() => {
               onAdd(cases.filter((_, i) => picked.has(i)));
               close();

@@ -120,17 +120,57 @@ function TestCasesPage() {
     return { total, executed, pass, fail, notExec };
   }, [cases]);
 
-  function saveCase(tc: TestCase) {
-    update((s) => {
-      const exists = s.testCases.some((c) => c.id === tc.id);
-      return {
-        ...s,
-        testCases: exists ? s.testCases.map((c) => (c.id === tc.id ? tc : c)) : [tc, ...s.testCases],
-      };
-    });
-    log(`${isNew ? "Created" : "Updated"} test case ${tc.id} - ${tc.title}`);
+  function saveCase(tc: TestCase, note?: string): TestCase {
+    const prev = state.testCases.find((c) => c.id === tc.id);
+    let next = tc;
+    if (prev) {
+      const changed =
+        prev.title !== tc.title ||
+        prev.desc !== tc.desc ||
+        prev.steps !== tc.steps ||
+        prev.expected !== tc.expected ||
+        prev.priority !== tc.priority ||
+        prev.type !== tc.type ||
+        prev.moduleId !== tc.moduleId ||
+        prev.tags !== tc.tags;
+      if (changed) {
+        const prevVersion = prev.version ?? 1;
+        next = {
+          ...tc,
+          version: prevVersion + 1,
+          versions: [
+            {
+              version: prevVersion,
+              ts: new Date().toISOString(),
+              user: currentUser.name,
+              note: note ?? "Edited test case",
+              snapshot: {
+                title: prev.title,
+                type: prev.type,
+                priority: prev.priority,
+                desc: prev.desc,
+                steps: prev.steps,
+                expected: prev.expected,
+                moduleId: prev.moduleId,
+                tags: prev.tags,
+              },
+            },
+            ...(prev.versions ?? []),
+          ].slice(0, 30),
+        };
+      }
+    } else {
+      next = { ...tc, version: tc.version ?? 1, versions: tc.versions ?? [] };
+    }
+    update((s) => ({
+      ...s,
+      testCases: prev ? s.testCases.map((c) => (c.id === next.id ? next : c)) : [next, ...s.testCases],
+    }));
+    log(`${prev ? "Updated" : "Created"} test case ${next.id} - ${next.title}${prev && next.version !== prev.version ? ` (v${next.version})` : ""}`);
     setEditing(null);
+    return next;
   }
+
 
   function deleteCase(id: string) {
     if (!confirm("Delete this test case?")) return;

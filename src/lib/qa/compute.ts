@@ -263,9 +263,13 @@ export function recommendations(state: QaState): Recommendation[] {
   return out.sort((a, b) => order[a.severity] - order[b.severity]);
 }
 
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
 export function fmtDate(iso: string) {
   if (!iso) return "\u2014";
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return iso;
-  return d.toLocaleDateString(undefined, { day: "2-digit", month: "short", year: "2-digit" });
+  const day = String(d.getUTCDate()).padStart(2, "0");
+  return `${day} ${MONTHS[d.getUTCMonth()]} ${String(d.getUTCFullYear()).slice(2)}`;
 }
+

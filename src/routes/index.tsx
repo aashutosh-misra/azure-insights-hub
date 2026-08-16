@@ -59,6 +59,7 @@ function DashboardPage() {
   const project = state.currentProject;
 
   const [moduleFilter, setModuleFilter] = useState("All");
+  const [drill, setDrill] = useState<"executed" | "pass" | "defects" | "coverage" | null>(null);
 
   const allModules = useMemo(() => scopedModules(state), [state]);
   const modules = useMemo(

@@ -273,7 +273,19 @@ function TestCasesPage() {
         }
       />
 
+      <AiGenerateDialog
+        open={aiOpen}
+        onClose={() => setAiOpen(false)}
+        onAdd={addGenerated}
+        moduleName={aiModule?.name ?? ""}
+        projectName={aiModule?.proj ?? state.currentProject}
+        core={aiCore}
+        disabled={!aiModule}
+        disabledHint="Create a module for this project first — generated cases must live in a module."
+      />
+
       <ImportDialog
+
         open={importOpen}
         onClose={() => setImportOpen(false)}
         onImport={importRecords}

@@ -3,6 +3,8 @@ import { useMemo, useState } from "react";
 import { useQa, uid } from "@/lib/qa/store";
 import { scopedTestCases, scopedModules, moduleById, fmtDate } from "@/lib/qa/compute";
 import { ImportDialog } from "@/components/qa/ImportDialog";
+import { AiGenerateDialog } from "@/components/qa/AiGenerateDialog";
+import type { GeneratedCase } from "@/lib/qa/ai.server";
 import type { ImportField } from "@/lib/qa/import";
 import type { TestCase, ActivityEntry } from "@/lib/qa/types";
 import { EXEC_STATUSES, SEVERITIES } from "@/lib/qa/seed";
@@ -55,6 +57,9 @@ function emptyTc(): TestCase {
     reqIds: [],
     activity: [],
     tags: "",
+    version: 1,
+    versions: [],
+
   };
 }
 
@@ -72,10 +77,38 @@ function TestCasesPage() {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [editing, setEditing] = useState<TestCase | null>(null);
   const [viewing, setViewing] = useState<TestCase | null>(null);
-  const [isNew, setIsNew] = useState(false);
+  const [, setIsNew] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
+  const [aiOpen, setAiOpen] = useState(false);
   const projectModules = useMemo(() => scopedModules(state), [state]);
   const [importModuleId, setImportModuleId] = useState("");
+  const aiModule = useMemo(
+    () => projectModules.find((m) => m.id === importModuleId) ?? projectModules[0],
+    [projectModules, importModuleId],
+  );
+  const aiCore = useMemo(
+    () => state.projects.find((p) => p.name === (aiModule?.proj ?? state.currentProject))?.core ?? "Other",
+    [state, aiModule],
+  );
+
+  function addGenerated(gen: GeneratedCase[]) {
+    const moduleId = importModuleId || aiModule?.id || "";
+    const created: TestCase[] = gen.map((g) => ({
+      ...emptyTc(),
+      id: uid("tc"),
+      moduleId,
+      title: g.title,
+      desc: g.desc,
+      steps: g.steps,
+      expected: g.expected,
+      type: g.type,
+      priority: (SEVERITIES as readonly string[]).includes(g.priority) ? (g.priority as TestCase["priority"]) : "Medium",
+      tags: g.tags,
+    }));
+    update((s) => ({ ...s, testCases: [...created, ...s.testCases] }));
+    log(`AI generated ${created.length} test case(s) into ${aiModule?.name ?? "module"}`);
+  }
+
 
   function importRecords(records: Record<ImportField, string>[]) {
     const imported: TestCase[] = records.map((r) => ({
@@ -120,17 +153,57 @@ function TestCasesPage() {
     return { total, executed, pass, fail, notExec };
   }, [cases]);
 
-  function saveCase(tc: TestCase) {
-    update((s) => {
-      const exists = s.testCases.some((c) => c.id === tc.id);
-      return {
-        ...s,
-        testCases: exists ? s.testCases.map((c) => (c.id === tc.id ? tc : c)) : [tc, ...s.testCases],
-      };
-    });
-    log(`${isNew ? "Created" : "Updated"} test case ${tc.id} - ${tc.title}`);
+  function saveCase(tc: TestCase, note?: string): TestCase {
+    const prev = state.testCases.find((c) => c.id === tc.id);
+    let next = tc;
+    if (prev) {
+      const changed =
+        prev.title !== tc.title ||
+        prev.desc !== tc.desc ||
+        prev.steps !== tc.steps ||
+        prev.expected !== tc.expected ||
+        prev.priority !== tc.priority ||
+        prev.type !== tc.type ||
+        prev.moduleId !== tc.moduleId ||
+        prev.tags !== tc.tags;
+      if (changed) {
+        const prevVersion = prev.version ?? 1;
+        next = {
+          ...tc,
+          version: prevVersion + 1,
+          versions: [
+            {
+              version: prevVersion,
+              ts: new Date().toISOString(),
+              user: currentUser.name,
+              note: note ?? "Edited test case",
+              snapshot: {
+                title: prev.title,
+                type: prev.type,
+                priority: prev.priority,
+                desc: prev.desc,
+                steps: prev.steps,
+                expected: prev.expected,
+                moduleId: prev.moduleId,
+                tags: prev.tags,
+              },
+            },
+            ...(prev.versions ?? []),
+          ].slice(0, 30),
+        };
+      }
+    } else {
+      next = { ...tc, version: tc.version ?? 1, versions: tc.versions ?? [] };
+    }
+    update((s) => ({
+      ...s,
+      testCases: prev ? s.testCases.map((c) => (c.id === next.id ? next : c)) : [next, ...s.testCases],
+    }));
+    log(`${prev ? "Updated" : "Created"} test case ${next.id} - ${next.title}${prev && next.version !== prev.version ? ` (v${next.version})` : ""}`);
     setEditing(null);
+    return next;
   }
+
 
   function deleteCase(id: string) {
     if (!confirm("Delete this test case?")) return;
@@ -184,6 +257,7 @@ function TestCasesPage() {
         subtitle="Register of all authored test cases scoped to the active project."
         actions={
           <>
+            <Btn onClick={() => setAiOpen(true)}>✨ Generate with AI</Btn>
             <Btn onClick={() => setImportOpen(true)}>Import Excel / CSV</Btn>
             <Btn onClick={exportCsv}>Export CSV</Btn>
             <Btn
@@ -199,7 +273,19 @@ function TestCasesPage() {
         }
       />
 
+      <AiGenerateDialog
+        open={aiOpen}
+        onClose={() => setAiOpen(false)}
+        onAdd={addGenerated}
+        moduleName={aiModule?.name ?? ""}
+        projectName={aiModule?.proj ?? state.currentProject}
+        core={aiCore}
+        disabled={!aiModule}
+        disabledHint="Create a module for this project first — generated cases must live in a module."
+      />
+
       <ImportDialog
+
         open={importOpen}
         onClose={() => setImportOpen(false)}
         onImport={importRecords}
@@ -305,7 +391,10 @@ function TestCasesPage() {
                     onChange={() => toggleSelect(c.id)}
                   />
                 </Td>
-                <Td className="font-mono text-[11px]">{c.id}</Td>
+                <Td className="font-mono text-[11px]">
+                  {c.id}
+                  <Badge tone="purple" className="ml-1">v{c.version ?? 1}</Badge>
+                </Td>
                 <Td className="font-medium">{c.title}</Td>
                 <Td>{moduleById(state, c.moduleId)?.name ?? "—"}</Td>
                 <Td>{c.type}</Td>
@@ -385,20 +474,48 @@ function TestCasesPage() {
                   </div>
                 ))}
               </div>
+              <p className="mb-1.5 mt-4 text-[11px] font-semibold uppercase text-muted-foreground">
+                Version history · v{viewing.version ?? 1}
+              </p>
+              <div className="max-h-56 space-y-2 overflow-y-auto rounded border border-border p-2">
+                {(viewing.versions ?? []).length === 0 && (
+                  <p className="text-[12px] text-muted-foreground">No previous versions.</p>
+                )}
+                {(viewing.versions ?? []).map((v) => (
+                  <div key={v.version} className="border-b border-border pb-1.5 text-[11.5px] last:border-0">
+                    <div className="flex items-center justify-between gap-2">
+                      <span>
+                        <Badge tone="purple">v{v.version}</Badge>{" "}
+                        <span className="font-semibold">{v.user}</span> · {fmtDate(v.ts)}
+                      </span>
+                      <Btn
+                        onClick={() => {
+                          const restored = saveCase({ ...viewing, ...v.snapshot }, `Restored from v${v.version}`);
+                          setViewing(restored);
+                        }}
+                      >
+                        Restore
+                      </Btn>
+                    </div>
+                    <p className="text-muted-foreground">{v.note}</p>
+                    <p className="text-muted-foreground">{v.snapshot.title}</p>
+                  </div>
+                ))}
+              </div>
               <div className="mt-3 flex flex-wrap gap-1.5">
                 {EXEC_STATUSES.map((s) => (
                   <Btn
                     key={s}
                     onClick={() => {
                       const updated = addActivity({ ...viewing, status: s as TestCase["status"] }, `Status changed to ${s}`);
-                      saveCase(updated);
-                      setViewing(updated);
+                      setViewing(saveCase(updated, `Status → ${s}`));
                     }}
                   >
                     {s}
                   </Btn>
                 ))}
               </div>
+
             </div>
           </div>
         </Modal>

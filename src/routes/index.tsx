@@ -14,7 +14,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { Badge, Card, Empty, inputCls, Kpi, PageHeader, Progress, Table, Td } from "@/components/qa/ui";
+import { Badge, Card, Empty, inputCls, Kpi, Modal, PageHeader, Progress, Table, Td } from "@/components/qa/ui";
 import {
   daysSince,
   execStats,
@@ -59,6 +59,7 @@ function DashboardPage() {
   const project = state.currentProject;
 
   const [moduleFilter, setModuleFilter] = useState("All");
+  const [drill, setDrill] = useState<"executed" | "pass" | "defects" | "coverage" | null>(null);
 
   const allModules = useMemo(() => scopedModules(state), [state]);
   const modules = useMemo(
@@ -114,6 +115,22 @@ function DashboardPage() {
     })
     .slice(0, 10);
 
+  const drillCases =
+    drill === "executed"
+      ? cases.filter((c) => c.status !== "Not Executed")
+      : drill === "pass"
+        ? cases.filter((c) => c.status === "Pass" || c.status === "Fail")
+        : [];
+  const drillTitle =
+    drill === "executed"
+      ? `Executed test cases (${drillCases.length})`
+      : drill === "pass"
+        ? `Passed & failed test cases (${drillCases.length})`
+        : drill === "defects"
+          ? `Open defects (${openDefects.length})`
+          : `Requirement coverage by module (${modules.length})`;
+
+
   const projectCards = (project === "All" ? state.projects.map((p) => p.name) : [project]).map((p) =>
     projectRag(state, p),
   );
@@ -146,11 +163,74 @@ function DashboardPage() {
       />
 
       <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <Kpi label="Execution progress" value={`${st.execPct}%`} sub={`${st.executed} of ${st.total} executed`} tone="blue" />
-        <Kpi label="Pass rate" value={`${st.passPct}%`} sub={`${st.passed} passed · ${st.failed} failed`} tone={st.passPct >= 90 ? "green" : st.passPct >= 75 ? "amber" : "red"} />
-        <Kpi label="Open defects" value={openDefects.length} sub={`${critical} critical · ${breaches} SLA breached`} tone={critical ? "red" : openDefects.length ? "amber" : "green"} />
-        <Kpi label="Requirement coverage" value={`${coveragePct}%`} sub={`${doneReqs} of ${totalReqs} requirements`} tone={coveragePct >= 85 ? "green" : "amber"} />
+        <Kpi label="Execution progress" value={`${st.execPct}%`} sub={`${st.executed} of ${st.total} executed`} tone="blue" onClick={() => setDrill("executed")} />
+        <Kpi label="Pass rate" value={`${st.passPct}%`} sub={`${st.passed} passed · ${st.failed} failed`} tone={st.passPct >= 90 ? "green" : st.passPct >= 75 ? "amber" : "red"} onClick={() => setDrill("pass")} />
+        <Kpi label="Open defects" value={openDefects.length} sub={`${critical} critical · ${breaches} SLA breached`} tone={critical ? "red" : openDefects.length ? "amber" : "green"} onClick={() => setDrill("defects")} />
+        <Kpi label="Requirement coverage" value={`${coveragePct}%`} sub={`${doneReqs} of ${totalReqs} requirements`} tone={coveragePct >= 85 ? "green" : "amber"} onClick={() => setDrill("coverage")} />
       </section>
+
+      <Modal open={drill !== null} title={drillTitle} onClose={() => setDrill(null)} wide>
+        {drill === "defects" ? (
+          openDefects.length ? (
+            <Table head={["Defect", "Title", "Severity", "Status", "Module", "Age"]} minWidth={720}>
+              {openDefects.map((d) => (
+                <tr key={d.id}>
+                  <Td className="font-mono text-[11px]">{d.defectId}</Td>
+                  <Td>{d.title}</Td>
+                  <Td>
+                    <Badge tone={STATUS_TONE[d.severity] ?? "muted"}>{d.severity}</Badge>
+                  </Td>
+                  <Td>
+                    <Badge>{d.status}</Badge>
+                  </Td>
+                  <Td>{moduleById(state, d.moduleId)?.name ?? "—"}</Td>
+                  <Td>{daysSince(d.createdAt)}d</Td>
+                </tr>
+              ))}
+            </Table>
+          ) : (
+            <Empty text="No open defects in scope." />
+          )
+        ) : drill === "coverage" ? (
+          <Table head={["Module", "Project", "Requirements", "Coverage", "Status"]} minWidth={640}>
+            {modules.map((m) => (
+              <tr key={m.id}>
+                <Td className="font-medium">{m.name}</Td>
+                <Td>{m.proj}</Td>
+                <Td>
+                  {m.reqs} / {m.totalReqs}
+                </Td>
+                <Td className="w-40">
+                  <Progress pct={m.totalReqs ? Math.round((m.reqs / m.totalReqs) * 100) : 0} tone="blue" />
+                </Td>
+                <Td>
+                  <Badge>{m.status}</Badge>
+                </Td>
+              </tr>
+            ))}
+          </Table>
+        ) : drillCases.length ? (
+          <Table head={["ID", "Title", "Module", "Priority", "Status", "Assignee"]} minWidth={720}>
+            {drillCases.map((c) => (
+              <tr key={c.id}>
+                <Td className="font-mono text-[11px]">{c.id}</Td>
+                <Td>{c.title}</Td>
+                <Td>{moduleById(state, c.moduleId)?.name ?? "—"}</Td>
+                <Td>
+                  <Badge>{c.priority}</Badge>
+                </Td>
+                <Td>
+                  <Badge>{c.status}</Badge>
+                </Td>
+                <Td>{c.assignee || "—"}</Td>
+              </tr>
+            ))}
+          </Table>
+        ) : (
+          <Empty text="Nothing to show for this metric yet." />
+        )}
+      </Modal>
+
 
       <section className="grid gap-3 lg:grid-cols-3">
         <Card title="Execution trend" className="lg:col-span-2">

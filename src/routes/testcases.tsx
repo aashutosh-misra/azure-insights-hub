@@ -55,6 +55,9 @@ function emptyTc(): TestCase {
     reqIds: [],
     activity: [],
     tags: "",
+    version: 1,
+    versions: [],
+
   };
 }
 

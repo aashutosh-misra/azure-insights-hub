@@ -257,6 +257,7 @@ function TestCasesPage() {
         subtitle="Register of all authored test cases scoped to the active project."
         actions={
           <>
+            <Btn onClick={() => setAiOpen(true)}>✨ Generate with AI</Btn>
             <Btn onClick={() => setImportOpen(true)}>Import Excel / CSV</Btn>
             <Btn onClick={exportCsv}>Export CSV</Btn>
             <Btn

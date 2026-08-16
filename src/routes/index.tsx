@@ -14,7 +14,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { Badge, Card, Empty, inputCls, Kpi, PageHeader, Progress, Table, Td } from "@/components/qa/ui";
+import { Badge, Card, Empty, inputCls, Kpi, Modal, PageHeader, Progress, Table, Td } from "@/components/qa/ui";
 import {
   daysSince,
   execStats,

@@ -385,20 +385,48 @@ function TestCasesPage() {
                   </div>
                 ))}
               </div>
+              <p className="mb-1.5 mt-4 text-[11px] font-semibold uppercase text-muted-foreground">
+                Version history · v{viewing.version ?? 1}
+              </p>
+              <div className="max-h-56 space-y-2 overflow-y-auto rounded border border-border p-2">
+                {(viewing.versions ?? []).length === 0 && (
+                  <p className="text-[12px] text-muted-foreground">No previous versions.</p>
+                )}
+                {(viewing.versions ?? []).map((v) => (
+                  <div key={v.version} className="border-b border-border pb-1.5 text-[11.5px] last:border-0">
+                    <div className="flex items-center justify-between gap-2">
+                      <span>
+                        <Badge tone="purple">v{v.version}</Badge>{" "}
+                        <span className="font-semibold">{v.user}</span> · {fmtDate(v.ts)}
+                      </span>
+                      <Btn
+                        onClick={() => {
+                          const restored = saveCase({ ...viewing, ...v.snapshot }, `Restored from v${v.version}`);
+                          setViewing(restored);
+                        }}
+                      >
+                        Restore
+                      </Btn>
+                    </div>
+                    <p className="text-muted-foreground">{v.note}</p>
+                    <p className="text-muted-foreground">{v.snapshot.title}</p>
+                  </div>
+                ))}
+              </div>
               <div className="mt-3 flex flex-wrap gap-1.5">
                 {EXEC_STATUSES.map((s) => (
                   <Btn
                     key={s}
                     onClick={() => {
                       const updated = addActivity({ ...viewing, status: s as TestCase["status"] }, `Status changed to ${s}`);
-                      saveCase(updated);
-                      setViewing(updated);
+                      setViewing(saveCase(updated, `Status → ${s}`));
                     }}
                   >
                     {s}
                   </Btn>
                 ))}
               </div>
+
             </div>
           </div>
         </Modal>

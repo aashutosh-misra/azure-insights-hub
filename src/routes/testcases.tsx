@@ -3,6 +3,8 @@ import { useMemo, useState } from "react";
 import { useQa, uid } from "@/lib/qa/store";
 import { scopedTestCases, scopedModules, moduleById, fmtDate } from "@/lib/qa/compute";
 import { ImportDialog } from "@/components/qa/ImportDialog";
+import { AiGenerateDialog } from "@/components/qa/AiGenerateDialog";
+import type { GeneratedCase } from "@/lib/qa/ai.server";
 import type { ImportField } from "@/lib/qa/import";
 import type { TestCase, ActivityEntry } from "@/lib/qa/types";
 import { EXEC_STATUSES, SEVERITIES } from "@/lib/qa/seed";

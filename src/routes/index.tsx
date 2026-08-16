@@ -115,6 +115,22 @@ function DashboardPage() {
     })
     .slice(0, 10);
 
+  const drillCases =
+    drill === "executed"
+      ? cases.filter((c) => c.status !== "Not Executed")
+      : drill === "pass"
+        ? cases.filter((c) => c.status === "Pass" || c.status === "Fail")
+        : [];
+  const drillTitle =
+    drill === "executed"
+      ? `Executed test cases (${drillCases.length})`
+      : drill === "pass"
+        ? `Passed & failed test cases (${drillCases.length})`
+        : drill === "defects"
+          ? `Open defects (${openDefects.length})`
+          : `Requirement coverage by module (${modules.length})`;
+
+
   const projectCards = (project === "All" ? state.projects.map((p) => p.name) : [project]).map((p) =>
     projectRag(state, p),
   );

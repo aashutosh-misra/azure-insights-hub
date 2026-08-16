@@ -75,10 +75,38 @@ function TestCasesPage() {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [editing, setEditing] = useState<TestCase | null>(null);
   const [viewing, setViewing] = useState<TestCase | null>(null);
-  const [isNew, setIsNew] = useState(false);
+  const [, setIsNew] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
+  const [aiOpen, setAiOpen] = useState(false);
   const projectModules = useMemo(() => scopedModules(state), [state]);
   const [importModuleId, setImportModuleId] = useState("");
+  const aiModule = useMemo(
+    () => projectModules.find((m) => m.id === importModuleId) ?? projectModules[0],
+    [projectModules, importModuleId],
+  );
+  const aiCore = useMemo(
+    () => state.projects.find((p) => p.name === (aiModule?.proj ?? state.currentProject))?.core ?? "Other",
+    [state, aiModule],
+  );
+
+  function addGenerated(gen: GeneratedCase[]) {
+    const moduleId = importModuleId || aiModule?.id || "";
+    const created: TestCase[] = gen.map((g) => ({
+      ...emptyTc(),
+      id: uid("tc"),
+      moduleId,
+      title: g.title,
+      desc: g.desc,
+      steps: g.steps,
+      expected: g.expected,
+      type: g.type,
+      priority: (SEVERITIES as readonly string[]).includes(g.priority) ? (g.priority as TestCase["priority"]) : "Medium",
+      tags: g.tags,
+    }));
+    update((s) => ({ ...s, testCases: [...created, ...s.testCases] }));
+    log(`AI generated ${created.length} test case(s) into ${aiModule?.name ?? "module"}`);
+  }
+
 
   function importRecords(records: Record<ImportField, string>[]) {
     const imported: TestCase[] = records.map((r) => ({

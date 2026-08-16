@@ -37,6 +37,23 @@ export interface ActivityEntry {
   text: string;
 }
 
+export interface TestCaseVersion {
+  version: number;
+  ts: string;
+  user: string;
+  note: string;
+  snapshot: {
+    title: string;
+    type: string;
+    priority: Severity;
+    desc: string;
+    steps: string;
+    expected: string;
+    moduleId: string;
+    tags: string;
+  };
+}
+
 export interface TestCase {
   id: string;
   title: string;
@@ -55,7 +72,10 @@ export interface TestCase {
   reqIds: string[];
   activity: ActivityEntry[];
   tags: string;
+  version?: number;
+  versions?: TestCaseVersion[];
 }
+
 
 export interface TestPlan {
   id: string;

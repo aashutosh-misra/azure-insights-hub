@@ -378,7 +378,10 @@ function TestCasesPage() {
                     onChange={() => toggleSelect(c.id)}
                   />
                 </Td>
-                <Td className="font-mono text-[11px]">{c.id}</Td>
+                <Td className="font-mono text-[11px]">
+                  {c.id}
+                  <Badge tone="purple" className="ml-1">v{c.version ?? 1}</Badge>
+                </Td>
                 <Td className="font-medium">{c.title}</Td>
                 <Td>{moduleById(state, c.moduleId)?.name ?? "—"}</Td>
                 <Td>{c.type}</Td>

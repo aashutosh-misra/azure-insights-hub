@@ -125,6 +125,8 @@ export function QaProvider({ children }: { children: ReactNode }) {
     return {
       state,
       hydrated,
+      storage,
+
       update,
       set,
       log,

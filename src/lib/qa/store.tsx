@@ -134,7 +134,7 @@ export function QaProvider({ children }: { children: ReactNode }) {
       currentUser,
       projectFilter: (proj: string) => state.currentProject === "All" || proj === state.currentProject,
     };
-  }, [state, hydrated, update, set, log, reset]);
+  }, [state, hydrated, storage, update, set, log, reset]);
 
   return <QaContext.Provider value={value}>{children}</QaContext.Provider>;
 }

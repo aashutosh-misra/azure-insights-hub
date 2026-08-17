@@ -5,29 +5,31 @@ const WORKSPACE = "default";
 
 export const getDbStatus = createServerFn({ method: "GET" }).handler(async () => {
   const { pingDb } = await import("@/lib/db/pg.server");
-  return pingDb();
+  const r = await pingDb();
+  return { connected: r.connected, error: r.error ?? null, version: r.version ?? null };
 });
 
+/** Returns the stored state as a JSON string (null when Postgres is not configured). */
 export const loadQaState = createServerFn({ method: "GET" }).handler(async () => {
   const { readState, databaseUrl } = await import("@/lib/db/pg.server");
-  if (!databaseUrl()) return { enabled: false as const, state: null };
+  if (!databaseUrl()) return { enabled: false, json: null as string | null };
   try {
     const state = await readState(WORKSPACE);
-    return { enabled: true as const, state };
+    return { enabled: true, json: state ? JSON.stringify(state) : null };
   } catch {
-    return { enabled: false as const, state: null };
+    return { enabled: false, json: null as string | null };
   }
 });
 
 export const saveQaState = createServerFn({ method: "POST" })
-  .inputValidator((data) => z.object({ state: z.unknown() }).parse(data))
+  .inputValidator((data) => z.object({ json: z.string() }).parse(data))
   .handler(async ({ data }) => {
     const { writeState, databaseUrl } = await import("@/lib/db/pg.server");
-    if (!databaseUrl()) return { saved: false as const };
+    if (!databaseUrl()) return { saved: false, error: null as string | null };
     try {
-      await writeState(WORKSPACE, data.state);
-      return { saved: true as const };
+      await writeState(WORKSPACE, JSON.parse(data.json));
+      return { saved: true, error: null as string | null };
     } catch (e) {
-      return { saved: false as const, error: e instanceof Error ? e.message : String(e) };
+      return { saved: false, error: e instanceof Error ? e.message : String(e) };
     }
   });

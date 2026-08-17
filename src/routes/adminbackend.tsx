@@ -20,9 +20,28 @@ export const Route = createFileRoute("/adminbackend")({
   component: AdminPage,
 });
 
+type DbStatus = { connected: boolean; error: string | null; version: string | null };
+
 function AdminPage() {
-  const { state, update, log, reset } = useQa();
+  const { state, update, log, reset, storage } = useQa();
   const s = state.settings;
+  const [db, setDb] = useState<DbStatus | null>(null);
+  const [checking, setChecking] = useState(false);
+
+  async function checkDb() {
+    setChecking(true);
+    try {
+      setDb(await getDbStatus());
+    } catch (e) {
+      setDb({ connected: false, error: e instanceof Error ? e.message : String(e), version: null });
+    } finally {
+      setChecking(false);
+    }
+  }
+
+  useEffect(() => {
+    void checkDb();
+  }, []);
 
   function setSetting<K extends keyof typeof s>(key: K, value: (typeof s)[K]) {
     update((st) => ({ ...st, settings: { ...st.settings, [key]: value } }));
@@ -41,6 +60,50 @@ function AdminPage() {
   return (
     <div className="space-y-4">
       <PageHeader title="Admin Backend" subtitle="Platform configuration and audit trail" />
+
+      <Card
+        title="Database"
+        actions={
+          <Btn onClick={() => void checkDb()} disabled={checking}>
+            {checking ? "Checking…" : "Test connection"}
+          </Btn>
+        }
+      >
+        <div className="space-y-2 text-[12px]">
+          <div className="flex flex-wrap items-center gap-2">
+            <span
+              className={`inline-flex items-center gap-2 rounded-full px-3 py-1 font-medium ${
+                db?.connected
+                  ? "bg-emerald-500/15 text-emerald-600"
+                  : "bg-amber-500/15 text-amber-600"
+              }`}
+            >
+              <span className={`size-2 rounded-full ${db?.connected ? "bg-emerald-500" : "bg-amber-500"}`} />
+              {db == null
+                ? "Checking database…"
+                : db.connected
+                  ? `Connected — ${db.version ?? "PostgreSQL"}`
+                  : "Not connected"}
+            </span>
+            <span className="text-muted-foreground">
+              Data is being saved to{" "}
+              <strong>{storage === "postgres" ? "the shared PostgreSQL database" : "this browser only (demo mode)"}</strong>
+              .
+            </span>
+          </div>
+          {db && !db.connected && (
+            <p className="rounded-lg bg-destructive/10 px-3 py-2 text-destructive">{db.error}</p>
+          )}
+          <p className="text-muted-foreground">
+            To connect a database, set <code className="rounded bg-muted px-1">DATABASE_URL</code> in the{" "}
+            <code className="rounded bg-muted px-1">.env</code> file (format:{" "}
+            <code className="rounded bg-muted px-1">postgres://user:password@host:5432/dbname</code>) and restart the
+            app. Full instructions are in <strong>SETUP.md</strong>.
+          </p>
+        </div>
+      </Card>
+
+
 
 
       <div className="grid gap-3 lg:grid-cols-2">

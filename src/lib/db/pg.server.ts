@@ -46,7 +46,7 @@ async function ensureSchema() {
   return ready;
 }
 
-export async function pingDb(): Promise<{ connected: boolean; error?: string; version?: string }> {
+export async function pingDb(): Promise<{ connected: boolean; error?: string | undefined; version?: string | undefined }> {
   if (!databaseUrl()) return { connected: false, error: "DATABASE_URL not set" };
   try {
     await ensureSchema();

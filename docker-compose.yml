@@ -1,0 +1,40 @@
+# One command to run everything:  docker compose up -d
+# Then open http://localhost:3000
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-qa}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-qa_password}
+      POSTGRES_DB: ${POSTGRES_DB:-qa}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-qa}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      # The only setting the app needs to talk to the database:
+      DATABASE_URL: postgres://${POSTGRES_USER:-qa}:${POSTGRES_PASSWORD:-qa_password}@db:5432/${POSTGRES_DB:-qa}
+      # Optional Azure DevOps integration
+      AZURE_DEVOPS_ORG_URL: ${AZURE_DEVOPS_ORG_URL:-}
+      AZURE_DEVOPS_PAT: ${AZURE_DEVOPS_PAT:-}
+      # Optional AI test-case generation
+      LOVABLE_API_KEY: ${LOVABLE_API_KEY:-}
+      PORT: 3000
+    ports:
+      - "${APP_PORT:-3000}:3000"
+
+volumes:
+  db-data:
